@@ -8,36 +8,24 @@ const API_BASE =
     ? "http://localhost:5000"
     : "";
 
-/* =========================================================
-   SPACE SCENE
-========================================================= */
-
 function SpaceScene() {
   const mountRef = useRef(null);
 
   useEffect(() => {
     const mount = mountRef.current;
 
-    if (!mount) {
-      return undefined;
-    }
+    if (!mount) return;
 
     /* =========================================================
-       SCENE
+       CINEMATIC SPACE SCENE
+       Objects keep fixed 3D positions. Only the camera moves,
+       so planets, Moon, satellite and spacecraft never collide
+       just because the user moves the mouse/device.
     ========================================================= */
 
     const scene = new THREE.Scene();
-
     scene.background = new THREE.Color(0x010207);
-
-    scene.fog = new THREE.FogExp2(
-      0x010207,
-      0.0018
-    );
-
-    /* =========================================================
-       CAMERA
-    ========================================================= */
+    scene.fog = new THREE.FogExp2(0x010207, 0.0022);
 
     const camera = new THREE.PerspectiveCamera(
       52,
@@ -46,950 +34,433 @@ function SpaceScene() {
       2200
     );
 
-    const cameraHome = new THREE.Vector3(
-      0,
-      1.2,
-      19
-    );
-
+    const cameraHome = new THREE.Vector3(0, 1.2, 19);
     camera.position.copy(cameraHome);
 
-    /* =========================================================
-       RENDERER
-    ========================================================= */
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: false,
+      powerPreference: "high-performance",
+    });
 
-    const renderer =
-      new THREE.WebGLRenderer({
-        antialias: true,
-        alpha: false,
-        powerPreference: "high-performance",
-      });
-
-    renderer.setPixelRatio(
-      Math.min(window.devicePixelRatio || 1, 2)
-    );
-
-    renderer.setSize(
-      window.innerWidth,
-      window.innerHeight
-    );
-
-    renderer.outputColorSpace =
-      THREE.SRGBColorSpace;
-
-    renderer.toneMapping =
-      THREE.ACESFilmicToneMapping;
-
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.05;
-
     renderer.shadowMap.enabled = true;
-
-    /*
-      PCFSoftShadowMap was removed in newer Three.js.
-      PCFShadowMap is the supported replacement.
-    */
-    renderer.shadowMap.type =
-      THREE.PCFShadowMap;
+    renderer.shadowMap.type = THREE.PCFShadowMap;
 
     mount.appendChild(renderer.domElement);
 
     /* =========================================================
-       LIGHTING
-       The Sun is invisible. Only its light is used.
+       LIGHTING — one strong sun + extremely subtle fill
     ========================================================= */
 
-    const ambientLight =
-      new THREE.AmbientLight(
-        0xffffff,
-        0.018
-      );
-
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.055);
     scene.add(ambientLight);
 
-    const sunLight =
-      new THREE.DirectionalLight(
-        0xfff4df,
-        4.2
-      );
-
-    sunLight.position.set(
-      18,
-      9,
-      14
-    );
-
+    const sunLight = new THREE.DirectionalLight(0xfff4df, 4.2);
+    sunLight.position.set(18, 9, 14);
     sunLight.castShadow = true;
-
     scene.add(sunLight);
 
-    const blueFill =
-      new THREE.PointLight(
-        0x426cff,
-        0.035,
-        80
-      );
-
-    blueFill.position.set(
-      -18,
-      -8,
-      8
-    );
-
+    const blueFill = new THREE.PointLight(0x426cff, 0.18, 80);
+    blueFill.position.set(-18, -8, 8);
     scene.add(blueFill);
 
-    /* =========================================================
-       TEXTURE LOADER
-    ========================================================= */
-
-    const textureLoader =
-      new THREE.TextureLoader();
-
-    /* =========================================================
-       REALISTIC STAR FIELD
-       
-       Three independent depth layers:
-       - extremely distant stars
-       - medium stars
-       - a small number of closer stars
-
-       The shader is deliberately simple and safe.
-       uPixelRatio is explicitly declared as a uniform.
-    ========================================================= */
-
-    const createRealisticStars = ({
-      count,
-      minRadius,
-      maxRadius,
-      minSize,
-      maxSize,
-      opacity,
-      bandStrength,
-    }) => {
-      const geometry =
-        new THREE.BufferGeometry();
-
-      const positions =
-        new Float32Array(count * 3);
-
-      const colors =
-        new Float32Array(count * 3);
-
-      const sizes =
-        new Float32Array(count);
-
-      const starPalette = [
-        new THREE.Color(0xffffff),
-        new THREE.Color(0xf5f1e8),
-        new THREE.Color(0xdce9ff),
-        new THREE.Color(0xc9dcff),
-        new THREE.Color(0xffe0b5),
-      ];
-
-      for (
-        let i = 0;
-        i < count;
-        i += 1
-      ) {
-        const radius =
-          minRadius +
-          Math.pow(
-            Math.random(),
-            0.58
-          ) *
-            (maxRadius -
-              minRadius);
-
-        const theta =
-          Math.random() *
-          Math.PI *
-          2;
-
-        /*
-          Broad galactic concentration.
-          This is intentionally subtle so it does not
-          look like an artificial CSS galaxy.
-        */
-
-        let yBias;
-
-        if (
-          Math.random() <
-          bandStrength
-        ) {
-          yBias =
-            (Math.random() -
-              0.5) *
-            (0.10 +
-              Math.random() *
-                0.22);
-        } else {
-          yBias =
-            Math.random() *
-              2 -
-            1;
-        }
-
-        yBias =
-          THREE.MathUtils.clamp(
-            yBias,
-            -1,
-            1
-          );
-
-        const ringRadius =
-          Math.sqrt(
-            Math.max(
-              0,
-              1 -
-                yBias *
-                  yBias
-            )
-          );
-
-        positions[i * 3] =
-          radius *
-          ringRadius *
-          Math.cos(theta);
-
-        positions[i * 3 + 1] =
-          radius *
-          yBias;
-
-        positions[i * 3 + 2] =
-          radius *
-          ringRadius *
-          Math.sin(theta);
-
-        /*
-          Mostly white stars with very subtle
-          natural temperature differences.
-        */
-
-        const randomValue =
-          Math.random();
-
-        let paletteIndex = 0;
-
-        if (randomValue < 0.10) {
-          paletteIndex = 1;
-        } else if (
-          randomValue < 0.18
-        ) {
-          paletteIndex = 2;
-        } else if (
-          randomValue < 0.22
-        ) {
-          paletteIndex = 3;
-        } else if (
-          randomValue < 0.25
-        ) {
-          paletteIndex = 4;
-        }
-
-        const color =
-          starPalette[
-            paletteIndex
-          ];
-
-        const brightness =
-          0.72 +
-          Math.random() *
-            0.28;
-
-        colors[i * 3] =
-          color.r *
-          brightness;
-
-        colors[i * 3 + 1] =
-          color.g *
-          brightness;
-
-        colors[i * 3 + 2] =
-          color.b *
-          brightness;
-
-        /*
-          Most stars remain very small.
-          Only a tiny fraction become slightly
-          brighter foreground stars.
-        */
-
-        const sizeRandom =
-          Math.random();
-
-        sizes[i] =
-          minSize +
-          Math.pow(
-            sizeRandom,
-            3.6
-          ) *
-            (maxSize -
-              minSize);
-      }
-
-      geometry.setAttribute(
-        "position",
-        new THREE.BufferAttribute(
-          positions,
-          3
-        )
-      );
-
-      geometry.setAttribute(
-        "color",
-        new THREE.BufferAttribute(
-          colors,
-          3
-        )
-      );
-
-      geometry.setAttribute(
-        "size",
-        new THREE.BufferAttribute(
-          sizes,
-          1
-        )
-      );
-
-      const material =
-        new THREE.ShaderMaterial({
-          transparent: true,
-          depthWrite: false,
-          depthTest: true,
-          vertexColors: true,
-          blending:
-            THREE.AdditiveBlending,
-
-          uniforms: {
-            uPixelRatio: {
-              value: Math.min(
-                window.devicePixelRatio ||
-                  1,
-                2
-              ),
-            },
-
-            uOpacity: {
-              value: opacity,
-            },
-          },
-
-          vertexShader: `
-            attribute float size;
-
-            uniform float uPixelRatio;
-
-            varying vec3 vColor;
-
-            void main() {
-              vColor = color;
-
-              vec4 mvPosition =
-                modelViewMatrix *
-                vec4(position, 1.0);
-
-              float depth =
-                max(
-                  20.0,
-                  -mvPosition.z
-                );
-
-              float depthScale =
-                240.0 / depth;
-
-              gl_PointSize =
-                size *
-                uPixelRatio *
-                depthScale;
-
-              gl_PointSize =
-                clamp(
-                  gl_PointSize,
-                  0.45,
-                  3.6
-                );
-
-              gl_Position =
-                projectionMatrix *
-                mvPosition;
-            }
-          `,
-
-          fragmentShader: `
-            uniform float uOpacity;
-
-            varying vec3 vColor;
-
-            void main() {
-              vec2 point =
-                gl_PointCoord -
-                vec2(0.5);
-
-              float distanceFromCenter =
-                length(point);
-
-              if (
-                distanceFromCenter >
-                0.5
-              ) {
-                discard;
-              }
-
-              float core =
-                1.0 -
-                smoothstep(
-                  0.0,
-                  0.18,
-                  distanceFromCenter
-                );
-
-              float softEdge =
-                1.0 -
-                smoothstep(
-                  0.12,
-                  0.5,
-                  distanceFromCenter
-                );
-
-              float alpha =
-                (
-                  core * 0.88 +
-                  softEdge * 0.12
-                ) *
-                uOpacity;
-
-              gl_FragColor =
-                vec4(
-                  vColor,
-                  alpha
-                );
-            }
-          `,
-        });
-
-      return new THREE.Points(
-        geometry,
-        material
-      );
-    };
-
-    const farStars =
-      createRealisticStars({
-        count: 7600,
-        minRadius: 240,
-        maxRadius: 1100,
-        minSize: 0.40,
-        maxSize: 0.92,
-        opacity: 0.64,
-        bandStrength: 0.44,
-      });
-
-    const midStars =
-      createRealisticStars({
-        count: 2100,
-        minRadius: 95,
-        maxRadius: 420,
-        minSize: 0.42,
-        maxSize: 1.12,
-        opacity: 0.50,
-        bandStrength: 0.28,
-      });
-
-    const nearStars =
-      createRealisticStars({
-        count: 260,
-        minRadius: 55,
-        maxRadius: 180,
-        minSize: 0.58,
-        maxSize: 1.42,
-        opacity: 0.38,
-        bandStrength: 0.16,
-      });
-
-    scene.add(
-      farStars,
-      midStars,
-      nearStars
-    );
-
-    /* =========================================================
-       SUBTLE DEEP-SPACE NEBULA
-    ========================================================= */
-
-    const createNebulaTexture =
-      () => {
-        const canvas =
-          document.createElement(
-            "canvas"
-          );
-
-        canvas.width = 512;
-        canvas.height = 512;
-
-        const ctx =
-          canvas.getContext(
-            "2d"
-          );
-
-        if (!ctx) {
-          return null;
-        }
-
-        const image =
-          ctx.createImageData(
-            512,
-            512
-          );
-
-        for (
-          let y = 0;
-          y < 512;
-          y += 1
-        ) {
-          for (
-            let x = 0;
-            x < 512;
-            x += 1
-          ) {
-            const dx =
-              (x - 256) /
-              256;
-
-            const dy =
-              (y - 256) /
-              256;
-
-            const distance =
-              Math.sqrt(
-                dx * dx +
-                  dy * dy
-              );
-
-            const noiseA =
-              Math.sin(
-                x * 0.031 +
-                  y * 0.013
-              );
-
-            const noiseB =
-              Math.sin(
-                x * 0.011 -
-                  y * 0.027
-              );
-
-            const noise =
-              (
-                noiseA +
-                noiseB +
-                2
-              ) /
-              4;
-
-            const strength =
-              Math.max(
-                0,
-                1 -
-                  distance *
-                    1.35
-              ) *
-              (
-                0.42 +
-                noise *
-                  0.58
-              );
-
-            const index =
-              (y * 512 + x) *
-              4;
-
-            image.data[
-              index
-            ] =
-              24 *
-              strength;
-
-            image.data[
-              index + 1
-            ] =
-              52 *
-              strength;
-
-            image.data[
-              index + 2
-            ] =
-              108 *
-              strength;
-
-            image.data[
-              index + 3
-            ] =
-              72 *
-              strength;
-          }
-        }
-
-        ctx.putImageData(
-          image,
-          0,
-          0
-        );
-
-        const texture =
-          new THREE.CanvasTexture(
-            canvas
-          );
-
-        texture.colorSpace =
-          THREE.SRGBColorSpace;
-
-        return texture;
-      };
-
-    const nebulaTexture =
-      createNebulaTexture();
-
-    let nebulaOne = null;
-    let nebulaTwo = null;
-
-    if (nebulaTexture) {
-      const nebulaMaterial =
-        new THREE.SpriteMaterial({
-          map: nebulaTexture,
-          transparent: true,
-          opacity: 0.09,
-          depthWrite: false,
-          blending:
-            THREE.AdditiveBlending,
-        });
-
-      nebulaOne =
-        new THREE.Sprite(
-          nebulaMaterial
-        );
-
-      nebulaOne.scale.set(
-        70,
-        42,
-        1
-      );
-
-      nebulaOne.position.set(
-        -35,
-        16,
-        -80
-      );
-
-      nebulaTwo =
-        new THREE.Sprite(
-          nebulaMaterial.clone()
-        );
-
-      nebulaTwo.material.opacity =
-        0.055;
-
-      nebulaTwo.scale.set(
-        55,
-        34,
-        1
-      );
-
-      nebulaTwo.position.set(
-        42,
-        -18,
-        -110
-      );
-
-      scene.add(
-        nebulaOne,
-        nebulaTwo
-      );
+/* =========================================================
+   NATURAL DEEP-SPACE STAR FIELD
+   Only the universe background is changed.
+   Earth / Moon / ISS / Mars are untouched.
+========================================================= */
+
+const createNaturalStars = (
+  count,
+  minRadius,
+  maxRadius,
+  baseSize,
+  baseOpacity,
+  seed
+) => {
+  const geometry = new THREE.BufferGeometry();
+
+  const positions = new Float32Array(count * 3);
+  const colors = new Float32Array(count * 3);
+
+  let randomSeed = seed;
+
+  const random = () => {
+    randomSeed =
+      (randomSeed * 1664525 + 1013904223) % 4294967296;
+
+    return randomSeed / 4294967296;
+  };
+
+  const starColor = new THREE.Color();
+
+  for (let i = 0; i < count; i += 1) {
+    /*
+      Natural spherical distribution.
+      Slightly deeper stars are more common,
+      avoiding the artificial "flat galaxy wall" look.
+    */
+    const distribution = Math.pow(random(), 0.72);
+
+    const radius =
+      minRadius +
+      distribution * (maxRadius - minRadius);
+
+    const theta = random() * Math.PI * 2;
+    const u = random() * 2 - 1;
+    const s = Math.sqrt(Math.max(0, 1 - u * u));
+
+    positions[i * 3] =
+      radius * s * Math.cos(theta);
+
+    positions[i * 3 + 1] =
+      radius * s * Math.sin(theta);
+
+    positions[i * 3 + 2] =
+      radius * u;
+
+    /*
+      Realistic star colour variation:
+      mostly white, with very subtle warm and
+      blue-white stars.
+    */
+    const colorChance = random();
+
+    if (colorChance < 0.055) {
+      // Very subtle warm star
+      starColor.setRGB(1.0, 0.86, 0.70);
+    } else if (colorChance < 0.105) {
+      // Very subtle blue-white star
+      starColor.setRGB(0.72, 0.84, 1.0);
+    } else {
+      // Normal white star
+      starColor.setRGB(1.0, 0.97, 0.92);
     }
 
+    /*
+      Small natural brightness variation.
+      No neon colors and no artificial glowing blobs.
+    */
+    const brightness =
+      0.55 + random() * 0.45;
+
+    colors[i * 3] =
+      starColor.r * brightness;
+
+    colors[i * 3 + 1] =
+      starColor.g * brightness;
+
+    colors[i * 3 + 2] =
+      starColor.b * brightness;
+  }
+
+  geometry.setAttribute(
+    "position",
+    new THREE.BufferAttribute(positions, 3)
+  );
+
+  geometry.setAttribute(
+    "color",
+    new THREE.BufferAttribute(colors, 3)
+  );
+
+  const material = new THREE.PointsMaterial({
+    size: baseSize,
+    sizeAttenuation: true,
+    transparent: true,
+    opacity: baseOpacity,
+    vertexColors: true,
+    depthWrite: false,
+    depthTest: true,
+  });
+
+  return new THREE.Points(
+    geometry,
+    material
+  );
+};
+
+
+/*
+  Three natural depth layers.
+  The names remain farStars / midStars / nearStars
+  so the rest of the existing scene stays stable.
+*/
+
+const farStars = createNaturalStars(
+  7200,
+  180,
+  950,
+  0.52,
+  0.62,
+  18473
+);
+
+const midStars = createNaturalStars(
+  2200,
+  90,
+  400,
+  0.72,
+  0.42,
+  92831
+);
+
+const nearStars = createNaturalStars(
+  360,
+  50,
+  170,
+  0.95,
+  0.24,
+  51729
+);
+
+scene.add(
+  farStars,
+  midStars,
+  nearStars
+);
+
+
+/* =========================================================
+   VERY SUBTLE DEEP-SPACE DUST
+   No artificial blue galaxy / nebula shapes.
+========================================================= */
+
+const createSpaceDust = () => {
+  const geometry = new THREE.BufferGeometry();
+
+  const count = 650;
+  const positions = new Float32Array(count * 3);
+  const colors = new Float32Array(count * 3);
+
+  let randomSeed = 78321;
+
+  const random = () => {
+    randomSeed =
+      (randomSeed * 1664525 + 1013904223) % 4294967296;
+
+    return randomSeed / 4294967296;
+  };
+
+  for (let i = 0; i < count; i += 1) {
+    const radius =
+      260 + random() * 600;
+
+    const theta =
+      random() * Math.PI * 2;
+
+    const u =
+      random() * 2 - 1;
+
+    const s =
+      Math.sqrt(Math.max(0, 1 - u * u));
+
+    positions[i * 3] =
+      radius * s * Math.cos(theta);
+
+    positions[i * 3 + 1] =
+      radius * s * Math.sin(theta);
+
+    positions[i * 3 + 2] =
+      radius * u;
+
+    const brightness =
+      0.025 + random() * 0.035;
+
+    colors[i * 3] = brightness;
+    colors[i * 3 + 1] = brightness * 0.96;
+    colors[i * 3 + 2] = brightness * 0.92;
+  }
+
+  geometry.setAttribute(
+    "position",
+    new THREE.BufferAttribute(
+      positions,
+      3
+    )
+  );
+
+  geometry.setAttribute(
+    "color",
+    new THREE.BufferAttribute(
+      colors,
+      3
+    )
+  );
+
+  const material =
+    new THREE.PointsMaterial({
+      size: 1.8,
+      sizeAttenuation: true,
+      transparent: true,
+      opacity: 0.16,
+      vertexColors: true,
+      depthWrite: false,
+      depthTest: true,
+    });
+
+  return new THREE.Points(
+    geometry,
+    material
+  );
+};
+
+const spaceDust =
+  createSpaceDust();
+
+scene.add(spaceDust);
+
     /* =========================================================
-       EARTH
-       Existing Earth setup preserved.
+       EARTH — primary hero object
     ========================================================= */
 
-    const earthGroup =
-      new THREE.Group();
-
-    earthGroup.position.set(
-      0,
-      0,
-      0
-    );
-
+    const textureLoader = new THREE.TextureLoader();
+    const earthGroup = new THREE.Group();
+    earthGroup.position.set(0, 0, 0);
     scene.add(earthGroup);
 
-    const earthTexture =
-      textureLoader.load(
-        "https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg"
-      );
+    const earthTexture = textureLoader.load(
+      "https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg"
+    );
 
-    const earthNormal =
-      textureLoader.load(
-        "https://threejs.org/examples/textures/planets/earth_normal_2048.jpg"
-      );
+    const earthNormal = textureLoader.load(
+      "https://threejs.org/examples/textures/planets/earth_normal_2048.jpg"
+    );
 
-    const earthSpecular =
-      textureLoader.load(
-        "https://threejs.org/examples/textures/planets/earth_specular_2048.jpg"
-      );
+    const earthSpecular = textureLoader.load(
+      "https://threejs.org/examples/textures/planets/earth_specular_2048.jpg"
+    );
 
-    const earthLights =
-      textureLoader.load(
-        "https://threejs.org/examples/textures/planets/earth_lights_2048.png"
-      );
+    const earthLights = textureLoader.load(
+      "https://threejs.org/examples/textures/planets/earth_lights_2048.png"
+    );
 
-    const earthGeometry =
-      new THREE.SphereGeometry(
-        4.6,
-        128,
-        128
-      );
+    const earthGeometry = new THREE.SphereGeometry(
+      4.6,
+      128,
+      128
+    );
 
-    const earthMaterial =
-      new THREE.MeshPhongMaterial({
-        map: earthTexture,
-        normalMap: earthNormal,
-        specularMap:
-          earthSpecular,
-        specular:
-          new THREE.Color(
-            0x777777
-          ),
-        shininess: 24,
-      });
+    const earthMaterial = new THREE.MeshPhongMaterial({
+      map: earthTexture,
+      normalMap: earthNormal,
+      specularMap: earthSpecular,
+      specular: new THREE.Color(0x777777),
+      shininess: 24,
+    });
 
-    const earth =
-      new THREE.Mesh(
-        earthGeometry,
-        earthMaterial
-      );
+    const earth = new THREE.Mesh(
+      earthGeometry,
+      earthMaterial
+    );
 
-    earth.rotation.y =
-      -0.6;
-
+    earth.rotation.y = -0.6;
     earth.castShadow = true;
     earth.receiveShadow = true;
-
     earthGroup.add(earth);
 
-    /* =========================================================
-       EARTH NIGHT SIDE
-    ========================================================= */
+    const nightMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        uSunDirection: { value: new THREE.Vector3(18, 9, 14).normalize() },
+        uNightMap: { value: earthLights },
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        varying vec3 vNormal;
+        void main() {
+          vUv = uv;
+          vNormal = normalize(normalMatrix * normal);
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform sampler2D uNightMap;
+        uniform vec3 uSunDirection;
+        varying vec2 vUv;
+        varying vec3 vNormal;
+        void main() {
+          float lightSide = dot(normalize(vNormal), normalize(normalMatrix * uSunDirection));
+          float darkness = smoothstep(0.10, -0.18, lightSide);
+          vec4 city = texture2D(uNightMap, vUv);
+          float alpha = city.a * darkness * 0.52;
+          gl_FragColor = vec4(city.rgb * 1.15, alpha);
+        }
+      `,
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    });
 
-    const nightMaterial =
-      new THREE.ShaderMaterial({
-        uniforms: {
-          uNightMap: {
-            value: earthLights,
-          },
-
-          uSunDirection: {
-            value:
-              new THREE.Vector3(
-                18,
-                9,
-                14
-              ).normalize(),
-          },
-        },
-
-        vertexShader: `
-          varying vec2 vUv;
-          varying vec3 vWorldNormal;
-
-          void main() {
-            vUv = uv;
-
-            vWorldNormal =
-              normalize(
-                mat3(modelMatrix) *
-                normal
-              );
-
-            gl_Position =
-              projectionMatrix *
-              modelViewMatrix *
-              vec4(
-                position,
-                1.0
-              );
-          }
-        `,
-
-        fragmentShader: `
-          uniform sampler2D uNightMap;
-          uniform vec3 uSunDirection;
-
-          varying vec2 vUv;
-          varying vec3 vWorldNormal;
-
-          void main() {
-            vec3 normal =
-              normalize(
-                vWorldNormal
-              );
-
-            float sunFacing =
-              dot(
-                normal,
-                normalize(
-                  uSunDirection
-                )
-              );
-
-            float nightMask =
-              1.0 -
-              smoothstep(
-                -0.16,
-                0.12,
-                sunFacing
-              );
-
-            vec4 city =
-              texture2D(
-                uNightMap,
-                vUv
-              );
-
-            float alpha =
-              city.a *
-              city.r *
-              0.72 *
-              nightMask;
-
-            gl_FragColor =
-              vec4(
-                city.rgb * 1.12,
-                alpha
-              );
-          }
-        `,
-
-        transparent: true,
-        blending:
-          THREE.AdditiveBlending,
-        depthWrite: false,
-        depthTest: true,
-      });
-
-    const nightSide =
-      new THREE.Mesh(
-        new THREE.SphereGeometry(
-          4.615,
-          128,
-          128
-        ),
-        nightMaterial
-      );
-
-    nightSide.renderOrder = 2;
-
-    earthGroup.add(
-      nightSide
+    const nightSide = new THREE.Mesh(
+      new THREE.SphereGeometry(4.615, 128, 128),
+      nightMaterial
     );
 
-    /* =========================================================
-       EARTH CLOUDS
-    ========================================================= */
+    earthGroup.add(nightSide);
 
-    const cloudTexture =
-      textureLoader.load(
-        "https://threejs.org/examples/textures/planets/earth_clouds_1024.png"
-      );
-
-    const cloudMaterial =
-      new THREE.MeshPhongMaterial({
-        map: cloudTexture,
-        transparent: true,
-        opacity: 0.48,
-        depthWrite: false,
-      });
-
-    const clouds =
-      new THREE.Mesh(
-        new THREE.SphereGeometry(
-          4.68,
-          128,
-          128
-        ),
-        cloudMaterial
-      );
-
-    earthGroup.add(
-      clouds
+    const cloudTexture = textureLoader.load(
+      "https://threejs.org/examples/textures/planets/earth_clouds_1024.png"
     );
 
-    /* =========================================================
-       EARTH ATMOSPHERE
-    ========================================================= */
+    const cloudMaterial = new THREE.MeshPhongMaterial({
+      map: cloudTexture,
+      transparent: true,
+      opacity: 0.48,
+      depthWrite: false,
+    });
 
-    const atmosphereMaterial =
-      new THREE.MeshBasicMaterial({
-        color: 0x5ba9ff,
-        transparent: true,
-        opacity: 0.105,
-        side: THREE.BackSide,
-        blending:
-          THREE.AdditiveBlending,
-        depthWrite: false,
-      });
-
-    const atmosphere =
-      new THREE.Mesh(
-        new THREE.SphereGeometry(
-          4.88,
-          96,
-          96
-        ),
-        atmosphereMaterial
-      );
-
-    earthGroup.add(
-      atmosphere
+    const clouds = new THREE.Mesh(
+      new THREE.SphereGeometry(4.68, 128, 128),
+      cloudMaterial
     );
 
-    /* =========================================================
-       MOON
-       Existing orbit preserved.
-    ========================================================= */
+    earthGroup.add(clouds);
 
-    const moonOrbitGroup =
-      new THREE.Group();
+    const atmosphereMaterial = new THREE.MeshBasicMaterial({
+      color: 0x5ba9ff,
+      transparent: true,
+      opacity: 0.105,
+      side: THREE.BackSide,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
 
-    moonOrbitGroup.rotation.z =
-      -0.13;
-
-    scene.add(
-      moonOrbitGroup
+    const atmosphere = new THREE.Mesh(
+      new THREE.SphereGeometry(4.88, 96, 96),
+      atmosphereMaterial
     );
 
-    const moonOrbitRadius =
-      10.4;
+    earthGroup.add(atmosphere);
 
-    const moonTexture =
-      textureLoader.load(
-        "https://threejs.org/examples/textures/planets/moon_1024.jpg"
-      );
+    /* =========================================================
+       MOON — fixed on a clean orbit, far from satellite
+    ========================================================= */
 
-    const moonMaterial =
-      new THREE.MeshStandardMaterial({
-        map: moonTexture,
-        roughness: 1,
-        metalness: 0,
-      });
+    const moonOrbitGroup = new THREE.Group();
+    moonOrbitGroup.rotation.z = -0.13;
+    scene.add(moonOrbitGroup);
 
-    const moon =
-      new THREE.Mesh(
-        new THREE.SphereGeometry(
-          1.28,
-          96,
-          96
-        ),
-        moonMaterial
-      );
+    const moonOrbitRadius = 10.4;
+
+    const moonTexture = textureLoader.load(
+      "https://threejs.org/examples/textures/planets/moon_1024.jpg"
+    );
+
+    const moonMaterial = new THREE.MeshStandardMaterial({
+      map: moonTexture,
+      roughness: 1,
+      metalness: 0,
+    });
+
+    const moon = new THREE.Mesh(
+      new THREE.SphereGeometry(1.28, 96, 96),
+      moonMaterial
+    );
 
     moon.position.set(
       moonOrbitRadius,
@@ -999,248 +470,128 @@ function SpaceScene() {
 
     moon.castShadow = true;
     moon.receiveShadow = true;
+    moonOrbitGroup.add(moon);
 
-    moonOrbitGroup.add(
-      moon
-    );
-
-    /* =========================================================
-       MOON ORBIT INDICATOR
-    ========================================================= */
-
-    const moonOrbit =
-      new THREE.Mesh(
-        new THREE.RingGeometry(
-          moonOrbitRadius -
-            0.015,
-          moonOrbitRadius,
-          160
-        ),
-        new THREE.MeshBasicMaterial({
-          color: 0x7185a8,
-          transparent: true,
-          opacity: 0.055,
-          side: THREE.DoubleSide,
-          depthWrite: false,
-        })
-      );
-
-    moonOrbit.rotation.x =
-      Math.PI / 2;
-
-    scene.add(
-      moonOrbit
-    );
-
-    /* =========================================================
-       NASA / ISS SATELLITE
-       Preserved from previous version.
-    ========================================================= */
-
-    const issTextureLoader =
-      new THREE.TextureLoader();
-
-    const issTexture =
-      issTextureLoader.load(
-        "https://assets.science.nasa.gov/dynamicimage/assets/science/astro/universe/2023/09/SpaceStation-1.png?crop=faces%2Cfocalpoint&fit=clip&h=3022&w=5250"
-      );
-
-    issTexture.colorSpace =
-      THREE.SRGBColorSpace;
-
-    const issMaterial =
-      new THREE.SpriteMaterial({
-        map: issTexture,
+    /* Very subtle orbit indicator */
+    const moonOrbit = new THREE.Mesh(
+      new THREE.RingGeometry(
+        moonOrbitRadius - 0.015,
+        moonOrbitRadius,
+        160
+      ),
+      new THREE.MeshBasicMaterial({
+        color: 0x7185a8,
         transparent: true,
-        opacity: 1,
+        opacity: 0.055,
+        side: THREE.DoubleSide,
         depthWrite: false,
-        depthTest: true,
-      });
-
-    const issSprite =
-      new THREE.Sprite(
-        issMaterial
-      );
-
-    issSprite.scale.set(
-      4.8,
-      2.76,
-      1
+      })
     );
 
-    scene.add(
-      issSprite
+    moonOrbit.rotation.x = Math.PI / 2;
+    scene.add(moonOrbit);
+
+    /* =========================================================
+       NASA / ISS SATELLITE — preserved realistic NASA image
+    ========================================================= */
+
+    const issTextureLoader = new THREE.TextureLoader();
+    const issTexture = issTextureLoader.load(
+      "https://assets.science.nasa.gov/dynamicimage/assets/science/astro/universe/2023/09/SpaceStation-1.png?crop=faces%2Cfocalpoint&fit=clip&h=3022&w=5250"
     );
+    issTexture.colorSpace = THREE.SRGBColorSpace;
+
+    const issMaterial = new THREE.SpriteMaterial({
+      map: issTexture,
+      transparent: true,
+      opacity: 1,
+      depthWrite: false,
+      depthTest: true,
+    });
+
+    const issSprite = new THREE.Sprite(issMaterial);
+    issSprite.scale.set(4.8, 2.76, 1);
+    scene.add(issSprite);
 
     let issOrbitAngle = 0;
+    const issOrbitRadiusX = 8.2;
+    const issOrbitRadiusY = 4.8;
+    const issOrbitDepth = 1.8;
 
-    const issOrbitRadiusX =
-      8.2;
+    const updateISSOrbit = (elapsed) => {
+      issOrbitAngle = elapsed * 0.28;
 
-    const issOrbitRadiusY =
-      4.8;
+      const orbitX = Math.cos(issOrbitAngle) * issOrbitRadiusX;
+      const orbitY = Math.sin(issOrbitAngle) * issOrbitRadiusY + 0.4;
+      const orbitZ = Math.sin(issOrbitAngle * 1.15) * issOrbitDepth - 2.5;
 
-    const issOrbitDepth =
-      1.8;
+      issSprite.position.set(orbitX, orbitY, orbitZ);
+      issSprite.material.rotation = Math.sin(issOrbitAngle) * 0.08;
 
-    const updateISSOrbit =
-      (elapsed) => {
-        issOrbitAngle =
-          elapsed * 0.28;
+      const depthScale = 1 + Math.sin(issOrbitAngle) * 0.08;
+      issSprite.scale.set(4.8 * depthScale, 2.76 * depthScale, 1);
+    };
 
-        const orbitX =
-          Math.cos(
-            issOrbitAngle
-          ) *
-          issOrbitRadiusX;
-
-        const orbitY =
-          Math.sin(
-            issOrbitAngle
-          ) *
-            issOrbitRadiusY +
-          0.4;
-
-        const orbitZ =
-          Math.sin(
-            issOrbitAngle *
-              1.15
-          ) *
-            issOrbitDepth -
-          2.5;
-
-        issSprite.position.x =
-          orbitX;
-
-        issSprite.position.y =
-          orbitY;
-
-        issSprite.position.z =
-          orbitZ;
-
-        issSprite.material.rotation =
-          Math.sin(
-            issOrbitAngle
-          ) * 0.08;
-
-        const depthScale =
-          1 +
-          Math.sin(
-            issOrbitAngle
-          ) * 0.08;
-
-        issSprite.scale.set(
-          4.8 * depthScale,
-          2.76 * depthScale,
-          1
-        );
-      };
 
     /* =========================================================
-       MARS
-       
-       Only this distant planet is Mars.
-       It stays in its own position.
-       It rotates around its own Y axis only.
+       MARS — realistic NASA texture, fixed in deep background
     ========================================================= */
 
-    const marsTexture =
-      textureLoader.load(
-        "https://assets.science.nasa.gov/dynamicimage/assets/science/cds/3d/resources/image/mars/preview.webp?w=2048"
+    const marsTexture = textureLoader.load(
+      "https://assets.science.nasa.gov/dynamicimage/assets/science/cds/3d/resources/image/mars/preview.webp?w=2048"
+    );
+    marsTexture.colorSpace = THREE.SRGBColorSpace;
+    marsTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+
+    const marsMaterial = new THREE.MeshStandardMaterial({
+      map: marsTexture,
+      color: 0xffffff,
+      roughness: 1,
+      metalness: 0,
+    });
+
+    const distantPlanet = new THREE.Mesh(
+      new THREE.SphereGeometry(2.7, 128, 128),
+      marsMaterial
+    );
+
+    const positionMars = () => {
+      const isMobile = window.innerWidth <= 768;
+      distantPlanet.position.set(
+        isMobile ? -5.8 : -11.5,
+        isMobile ? -3.8 : -5.5,
+        isMobile ? -24 : -27
       );
-
-    marsTexture.colorSpace =
-      THREE.SRGBColorSpace;
-
-    marsTexture.anisotropy =
-      renderer.capabilities.getMaxAnisotropy();
-
-    const marsMaterial =
-      new THREE.MeshStandardMaterial({
-        map: marsTexture,
-        color: 0xffffff,
-        roughness: 1,
-        metalness: 0,
-      });
-
-    const distantPlanet =
-      new THREE.Mesh(
-        new THREE.SphereGeometry(
-          2.7,
-          128,
-          128
-        ),
-        marsMaterial
-      );
-
-    const positionMars =
-      () => {
-        const isMobile =
-          window.innerWidth <=
-          768;
-
-        /*
-          Mars remains separated from
-          Earth/Moon/ISS while staying
-          inside the visible frame.
-        */
-
-        if (isMobile) {
-          distantPlanet.position.set(
-            -5.8,
-            -3.8,
-            -24
-          );
-        } else {
-          distantPlanet.position.set(
-            -11.5,
-            -5.5,
-            -27
-          );
-        }
-      };
+    };
 
     positionMars();
+    distantPlanet.castShadow = true;
+    distantPlanet.receiveShadow = true;
+    scene.add(distantPlanet);
 
-    distantPlanet.castShadow =
-      true;
-
-    distantPlanet.receiveShadow =
-      true;
-
-    scene.add(
-      distantPlanet
+    const distantAtmosphere = new THREE.Mesh(
+      new THREE.SphereGeometry(2.79, 96, 96),
+      new THREE.MeshBasicMaterial({
+        color: 0xb36b4a,
+        transparent: true,
+        opacity: 0.035,
+        side: THREE.BackSide,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      })
     );
 
-    /* =========================================================
-       MARS ATMOSPHERE
-    ========================================================= */
-
-    const distantAtmosphere =
-      new THREE.Mesh(
-        new THREE.SphereGeometry(
-          2.79,
-          96,
-          96
-        ),
-        new THREE.MeshBasicMaterial({
-          color: 0xb36b4a,
-          transparent: true,
-          opacity: 0.035,
-          side: THREE.BackSide,
-          blending:
-            THREE.AdditiveBlending,
-          depthWrite: false,
-        })
-      );
-
-    distantPlanet.add(
-      distantAtmosphere
-    );
+    distantPlanet.add(distantAtmosphere);
 
     /* =========================================================
-       CAMERA INTERACTION
+       INTERACTION
+       Camera moves; objects stay spatially stable.
     ========================================================= */
+
+    const mouse = {
+      x: 0,
+      y: 0,
+    };
 
     const targetCamera = {
       x: 0,
@@ -1256,111 +607,61 @@ function SpaceScene() {
       lookY: 0,
     };
 
-    const setPointerTarget =
-      (x, y) => {
-        const safeX =
-          THREE.MathUtils.clamp(
-            x,
-            -1,
-            1
-          );
+    const setPointerTarget = (x, y) => {
+      const safeX = THREE.MathUtils.clamp(x, -1, 1);
+      const safeY = THREE.MathUtils.clamp(y, -1, 1);
 
-        const safeY =
-          THREE.MathUtils.clamp(
-            y,
-            -1,
-            1
-          );
+      mouse.x = safeX;
+      mouse.y = safeY;
 
-        targetCamera.x =
-          safeX * 1.35;
+      targetCamera.x = safeX * 1.35;
+      targetCamera.y = 1.2 - safeY * 0.85;
+      targetCamera.lookX = safeX * 1.0;
+      targetCamera.lookY = -safeY * 0.65;
+    };
 
-        targetCamera.y =
-          1.2 -
-          safeY * 0.85;
+    const handleMouseMove = (event) => {
+      setPointerTarget(
+        (event.clientX / window.innerWidth - 0.5) * 2,
+        (event.clientY / window.innerHeight - 0.5) * 2
+      );
+    };
 
-        targetCamera.lookX =
-          safeX * 1.0;
+    const handleTouchMove = (event) => {
+      if (!event.touches || !event.touches[0]) {
+        return;
+      }
 
-        targetCamera.lookY =
-          -safeY * 0.65;
-      };
+      const touch = event.touches[0];
 
-    const handleMouseMove =
-      (event) => {
-        setPointerTarget(
-          (
-            event.clientX /
-              window.innerWidth -
-            0.5
-          ) * 2,
+      setPointerTarget(
+        (touch.clientX / window.innerWidth - 0.5) * 2,
+        (touch.clientY / window.innerHeight - 0.5) * 2
+      );
+    };
 
-          (
-            event.clientY /
-              window.innerHeight -
-            0.5
-          ) * 2
-        );
-      };
+    const handleDeviceOrientation = (event) => {
+      if (
+        typeof event.gamma !== "number" ||
+        typeof event.beta !== "number"
+      ) {
+        return;
+      }
 
-    const handleTouchMove =
-      (event) => {
-        if (
-          !event.touches ||
-          !event.touches[0]
-        ) {
-          return;
-        }
+      const gamma = THREE.MathUtils.clamp(
+        event.gamma / 35,
+        -1,
+        1
+      );
 
-        const touch =
-          event.touches[0];
+      const beta = THREE.MathUtils.clamp(
+        (event.beta - 45) / 35,
+        -1,
+        1
+      );
 
-        setPointerTarget(
-          (
-            touch.clientX /
-              window.innerWidth -
-            0.5
-          ) * 2,
-
-          (
-            touch.clientY /
-              window.innerHeight -
-            0.5
-          ) * 2
-        );
-      };
-
-    const handleDeviceOrientation =
-      (event) => {
-        if (
-          typeof event.gamma !==
-            "number" ||
-          typeof event.beta !==
-            "number"
-        ) {
-          return;
-        }
-
-        const gamma =
-          THREE.MathUtils.clamp(
-            event.gamma / 35,
-            -1,
-            1
-          );
-
-        const beta =
-          THREE.MathUtils.clamp(
-            (event.beta - 45) /
-              35,
-            -1,
-            1
-          );
-
-        setPointerTarget(
-          gamma,
-          beta
-        );
-      };
+      setPointerTarget(gamma, beta);
+    };
 
     window.addEventListener(
       "mousemove",
@@ -1370,15 +671,10 @@ function SpaceScene() {
     window.addEventListener(
       "touchmove",
       handleTouchMove,
-      {
-        passive: true,
-      }
+      { passive: true }
     );
 
-    if (
-      "DeviceOrientationEvent" in
-      window
-    ) {
+    if ("DeviceOrientationEvent" in window) {
       window.addEventListener(
         "deviceorientation",
         handleDeviceOrientation
@@ -1386,139 +682,84 @@ function SpaceScene() {
     }
 
     /* =========================================================
+       ROCKET LAUNCH FROM SEND BUTTON
+    ========================================================= */
+
+    let launchActive = false;
+    let launchStart = 0;
+    let launchFrom = new THREE.Vector3();
+    let launchTo = new THREE.Vector3();
+
+    const handleRocketLaunch = () => {
+      if (launchActive) return;
+
+      launchActive = true;
+      launchStart = performance.now();
+
+      launchFrom.copy(spacecraftGroup.position);
+
+      launchTo.set(
+        spacecraftGroup.position.x + 13,
+        spacecraftGroup.position.y + 7,
+        spacecraftGroup.position.z - 18
+      );
+
+      flame.visible = true;
+      flameCore.visible = true;
+    };
+
+    window.addEventListener(
+      "shezorax:rocket-launch",
+      handleRocketLaunch
+    );
+
+    /* =========================================================
        ANIMATION
     ========================================================= */
 
-    /*
-      Use performance.now() instead of THREE.Clock.
-      This removes the deprecated Clock warning.
-    */
+    const clock = new THREE.Clock();
+    let animationId;
 
-    const animationStart =
-      performance.now();
+    const animate = () => {
+      animationId = requestAnimationFrame(animate);
 
-    let animationId = null;
+      const elapsed = clock.getElapsedTime();
 
-    const animate = (
-      currentTime
-    ) => {
-      animationId =
-        requestAnimationFrame(
-          animate
-        );
-
-      const elapsed =
-        (currentTime -
-          animationStart) /
-        1000;
-
-      /* -----------------------------------------
-         EARTH
-      ----------------------------------------- */
-
-      earth.rotation.y +=
-        0.00055;
-
-      /* -----------------------------------------
-         CLOUDS
-      ----------------------------------------- */
-
-      clouds.rotation.y +=
-        0.0008;
-
-      /* -----------------------------------------
-         EARTH NIGHT SIDE
-      ----------------------------------------- */
-
-      nightMaterial.uniforms.uSunDirection.value
-        .copy(
-          sunLight.position
-        )
-        .normalize();
-
-      /* -----------------------------------------
-         MOON
-         Same invisible Sun creates the lighting
-         and therefore the changing visible phase.
-      ----------------------------------------- */
+      earth.rotation.y += 0.00055;
+      clouds.rotation.y += 0.0008;
+      nightSide.rotation.y += 0.00055;
 
       moonOrbitGroup.rotation.y =
         elapsed * 0.025;
 
-      moon.rotation.y +=
-        0.0007;
+      moon.rotation.y += 0.0012;
 
-      /* -----------------------------------------
-         ISS
-      ----------------------------------------- */
+      updateISSOrbit(elapsed);
+      nightMaterial.uniforms.uSunDirection.value.copy(sunLight.position).normalize();
 
-      updateISSOrbit(
-        elapsed
-      );
+      distantPlanet.rotation.y += 0.00025;
 
-      /* -----------------------------------------
-         MARS
-         ONLY rotates on its own axis.
-         Its position is never changed here.
-      ----------------------------------------- */
-
-      distantPlanet.rotation.y +=
-        0.00035;
-
-      /* -----------------------------------------
-         NEBULA
-      ----------------------------------------- */
-
-      if (nebulaOne) {
-        nebulaOne.material.rotation =
-          Math.sin(
-            elapsed * 0.025
-          ) * 0.04;
-      }
-
-      if (nebulaTwo) {
-        nebulaTwo.material.rotation =
-          Math.cos(
-            elapsed * 0.02
-          ) * 0.035;
-      }
-
-      /* -----------------------------------------
-         CAMERA SMOOTHING
-      ----------------------------------------- */
+      farStars.rotation.y += 0.000008;
+      midStars.rotation.y -= 0.000012;
+      nearStars.rotation.y += 0.000018;
 
       smoothCamera.x +=
-        (
-          targetCamera.x -
-          smoothCamera.x
-        ) * 0.028;
+        (targetCamera.x - smoothCamera.x) * 0.028;
 
       smoothCamera.y +=
-        (
-          targetCamera.y -
-          smoothCamera.y
-        ) * 0.028;
+        (targetCamera.y - smoothCamera.y) * 0.028;
 
       smoothCamera.lookX +=
-        (
-          targetCamera.lookX -
-          smoothCamera.lookX
-        ) * 0.028;
+        (targetCamera.lookX - smoothCamera.lookX) *
+        0.028;
 
       smoothCamera.lookY +=
-        (
-          targetCamera.lookY -
-          smoothCamera.lookY
-        ) * 0.028;
+        (targetCamera.lookY - smoothCamera.lookY) *
+        0.028;
 
-      camera.position.x =
-        smoothCamera.x;
-
-      camera.position.y =
-        smoothCamera.y;
-
-      camera.position.z =
-        cameraHome.z;
+      camera.position.x = smoothCamera.x;
+      camera.position.y = smoothCamera.y;
+      camera.position.z = cameraHome.z;
 
       camera.lookAt(
         smoothCamera.lookX,
@@ -1526,69 +767,90 @@ function SpaceScene() {
         0
       );
 
-      renderer.render(
-        scene,
-        camera
-      );
+
+      /* Rocket launch trajectory */
+      if (launchActive) {
+        const elapsedLaunch =
+          performance.now() - launchStart;
+
+        const duration = 1450;
+        const progress = THREE.MathUtils.clamp(
+          elapsedLaunch / duration,
+          0,
+          1
+        );
+
+        const eased =
+          1 - Math.pow(1 - progress, 3);
+
+        spacecraftGroup.position.lerpVectors(
+          launchFrom,
+          launchTo,
+          eased
+        );
+
+        spacecraftGroup.rotation.z =
+          -0.18 - progress * 0.32;
+
+        const flamePulse =
+          0.82 +
+          Math.sin(elapsedLaunch * 0.035) * 0.18;
+
+        flame.scale.set(
+          1,
+          flamePulse,
+          flamePulse
+        );
+
+        flameCore.scale.set(
+          1,
+          0.9 + flamePulse * 0.22,
+          0.9 + flamePulse * 0.22
+        );
+
+        if (progress >= 1) {
+          launchActive = false;
+          flame.visible = false;
+          flameCore.visible = false;
+
+          spacecraftGroup.position.set(
+            10.5,
+            -5.2,
+            -6.5
+          );
+
+          spacecraftGroup.rotation.z =
+            -0.18;
+        }
+      }
+
+      renderer.render(scene, camera);
     };
 
-    animate(
-      performance.now()
-    );
+    animate();
 
     /* =========================================================
        RESIZE
     ========================================================= */
 
-    const handleResize =
-      () => {
-        camera.aspect =
-          window.innerWidth /
-          window.innerHeight;
+    const handleResize = () => {
+      camera.aspect =
+        window.innerWidth /
+        window.innerHeight;
 
-        camera.updateProjectionMatrix();
+      camera.updateProjectionMatrix();
 
-        renderer.setSize(
-          window.innerWidth,
-          window.innerHeight
-        );
+      renderer.setSize(
+        window.innerWidth,
+        window.innerHeight
+      );
 
-        renderer.setPixelRatio(
-          Math.min(
-            window.devicePixelRatio ||
-              1,
-            2
-          )
-        );
+      renderer.setPixelRatio(
+        Math.min(window.devicePixelRatio, 2)
+      );
 
-        /*
-          Update only Mars responsive
-          placement.
-        */
-
-        positionMars();
-
-        /*
-          Keep star shader pixel ratio
-          correct after resize.
-        */
-
-        const pixelRatio =
-          Math.min(
-            window.devicePixelRatio ||
-              1,
-            2
-          );
-
-        farStars.material.uniforms.uPixelRatio.value =
-          pixelRatio;
-
-        midStars.material.uniforms.uPixelRatio.value =
-          pixelRatio;
-
-        nearStars.material.uniforms.uPixelRatio.value =
-          pixelRatio;
-      };
+      positionMars();
+    };
 
     window.addEventListener(
       "resize",
@@ -1597,21 +859,10 @@ function SpaceScene() {
 
     /* =========================================================
        CLEANUP
-       
-       IMPORTANT:
-       No rocket event exists anymore.
-       Therefore there is no handleRocketLaunch
-       reference here.
     ========================================================= */
 
     return () => {
-      if (
-        animationId !== null
-      ) {
-        cancelAnimationFrame(
-          animationId
-        );
-      }
+      cancelAnimationFrame(animationId);
 
       window.removeEventListener(
         "mousemove",
@@ -1624,8 +875,7 @@ function SpaceScene() {
       );
 
       if (
-        "DeviceOrientationEvent" in
-        window
+        "DeviceOrientationEvent" in window
       ) {
         window.removeEventListener(
           "deviceorientation",
@@ -1634,71 +884,16 @@ function SpaceScene() {
       }
 
       window.removeEventListener(
+        "shezorax:rocket-launch",
+        handleRocketLaunch
+      );
+
+      window.removeEventListener(
         "resize",
         handleResize
       );
 
-      /* Dispose renderer */
-
       renderer.dispose();
-
-      /* Dispose star resources */
-
-      farStars.geometry.dispose();
-      farStars.material.dispose();
-
-      midStars.geometry.dispose();
-      midStars.material.dispose();
-
-      nearStars.geometry.dispose();
-      nearStars.material.dispose();
-
-      /* Dispose Earth resources */
-
-      earthGeometry.dispose();
-      earthMaterial.dispose();
-
-      nightSide.geometry.dispose();
-      nightMaterial.dispose();
-
-      cloudMaterial.dispose();
-      clouds.geometry.dispose();
-
-      atmosphereMaterial.dispose();
-      atmosphere.geometry.dispose();
-
-      /* Dispose Moon */
-
-      moonMaterial.dispose();
-      moon.geometry.dispose();
-
-      moonOrbit.geometry.dispose();
-      moonOrbit.material.dispose();
-
-      /* Dispose ISS */
-
-      issMaterial.dispose();
-
-      /* Dispose Mars */
-
-      marsMaterial.dispose();
-      distantPlanet.geometry.dispose();
-
-      distantAtmosphere.geometry.dispose();
-      distantAtmosphere.material.dispose();
-
-      /* Dispose nebula */
-
-      if (nebulaOne) {
-        nebulaOne.material.map?.dispose();
-        nebulaOne.material.dispose();
-      }
-
-      if (nebulaTwo) {
-        nebulaTwo.material.dispose();
-      }
-
-      /* Remove renderer */
 
       if (
         mount.contains(
@@ -1720,32 +915,18 @@ function SpaceScene() {
   );
 }
 
-/* =========================================================
-   TIME / GREETING
-========================================================= */
-
 function getGreeting() {
-  const hour =
-    new Date().getHours();
+  const hour = new Date().getHours();
 
-  if (
-    hour >= 5 &&
-    hour < 12
-  ) {
+  if (hour >= 5 && hour < 12) {
     return "Good Morning";
   }
 
-  if (
-    hour >= 12 &&
-    hour < 17
-  ) {
+  if (hour >= 12 && hour < 17) {
     return "Good Afternoon";
   }
 
-  if (
-    hour >= 17 &&
-    hour < 21
-  ) {
+  if (hour >= 17 && hour < 21) {
     return "Good Evening";
   }
 
@@ -1753,81 +934,191 @@ function getGreeting() {
 }
 
 function formatTime(date) {
-  return date.toLocaleTimeString(
-    [],
-    {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    }
-  );
+  return date.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
 }
 
 function formatDate(date) {
-  return date.toLocaleDateString(
-    [],
-    {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    }
-  );
+  return date.toLocaleDateString([], {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 }
 
-/* =========================================================
-   APP
-========================================================= */
+
+const PROJECT_TYPES = [
+  { id: "website", title: "Website / Web App", icon: "WEB", description: "Build websites, dashboards, portfolios and full web applications." },
+  { id: "school", title: "School Project", icon: "SCH", description: "Create school assignments, experiments, reports and presentations." },
+  { id: "university", title: "College / University", icon: "UNI", description: "Work on university assignments, FYPs, research and documentation." },
+  { id: "software", title: "Software / Desktop App", icon: "APP", description: "Plan software products, desktop tools and utility applications." },
+  { id: "ai", title: "AI Project", icon: "AI", description: "Design AI assistants, ML ideas, prompts and intelligent products." },
+  { id: "mobile", title: "Mobile App", icon: "MOB", description: "Create Android, iOS and cross-platform mobile applications." },
+  { id: "game", title: "Game Project", icon: "GAME", description: "Build game concepts, mechanics, stories and development plans." },
+  { id: "data", title: "Data / Research", icon: "DATA", description: "Analyze data, plan research and prepare technical findings." },
+  { id: "report", title: "Presentation / Report", icon: "DOC", description: "Create reports, presentations, proposals and structured documents." },
+  { id: "design", title: "Design / Creative", icon: "DES", description: "Develop UI/UX, branding, creative concepts and visual direction." },
+  { id: "custom", title: "Custom Project", icon: "NEW", description: "Start anything else with a completely custom AI workspace." },
+];
+
+function getProjectType(id) {
+  return PROJECT_TYPES.find((item) => item.id === id) || PROJECT_TYPES[0];
+}
+
+const SETTINGS_LANGUAGES = [
+  "English",
+  "Chinese",
+  "Japanese",
+  "Arabic",
+  "German",
+  "French",
+  "Urdu",
+  "Spanish",
+  "Portuguese",
+  "Italian",
+  "Korean",
+  "Hindi",
+  "Turkish",
+  "Russian",
+];
+
+const SETTINGS_VOICES = [
+  {
+    id: "Zeenora",
+    name: "Zeenora",
+    gender: "Female",
+    description: "ShezoraX female AI voice",
+  },
+  {
+    id: "Faaz",
+    name: "Faaz",
+    gender: "Male",
+    description: "ShezoraX male AI voice",
+  },
+];
+
+const SETTINGS_SECTIONS = [
+  {
+    id: "General",
+    icon: "⚙",
+    title: "General",
+    description: "Language, voice and general preferences",
+  },
+  {
+    id: "Profile",
+    icon: "◉",
+    title: "Profile",
+    description: "Manage your ShezoraX profile and account",
+  },
+  {
+    id: "Google Account",
+    icon: "G",
+    title: "Google Account",
+    description: "Manage your Google connection",
+  },
+  {
+    id: "Apple ID",
+    icon: "",
+    title: "Apple ID",
+    description: "Manage your Apple account connection",
+  },
+  {
+    id: "Religion & Faith",
+    icon: "☾",
+    title: "Religion & Faith",
+    description: "Manage faith and religious preferences",
+  },
+];
 
 function App() {
-  const [activePage, setActivePage] =
-    useState("Home");
+  const [activePage, setActivePage] = useState("Home");
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
-  const [message, setMessage] =
-    useState("");
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [projectDraft, setProjectDraft] = useState("");
+  const [projectMessages, setProjectMessages] = useState({});
+  const [projectLoading, setProjectLoading] = useState(false);
+  const [projectListening, setProjectListening] = useState(false);
+  const [projectTab, setProjectTab] = useState("chat");
+  const [projectNotes, setProjectNotes] = useState({});
+  const [projectCopied, setProjectCopied] = useState(false);
 
-  const [messages, setMessages] =
-    useState([]);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [voiceReplies, setVoiceReplies] = useState(true);
+  const [autoSpeakProject, setAutoSpeakProject] = useState(true);
 
-  const [loading, setLoading] =
-    useState(false);
+  const [settingsSection, setSettingsSection] = useState("General");
+  const [selectedLanguage, setSelectedLanguage] = useState("English");
+  const [selectedVoice, setSelectedVoice] = useState("Zeenora");
+  const [googleConnected, setGoogleConnected] = useState(false);
+  const [appleConnected, setAppleConnected] = useState(false);
 
-  const [isListening, setIsListening] =
-    useState(false);
-
-  const [isSpeaking, setIsSpeaking] =
-    useState(false);
-
-  const [darkMode, setDarkMode] =
-    useState(true);
-
-  const [currentTime, setCurrentTime] =
-    useState(new Date());
-
-  const recognitionRef =
-    useRef(null);
-
-  /* =========================================================
-     LIVE TIME
-  ========================================================= */
+  const voiceTargetRef = useRef("general");
+  const recognitionRef = useRef(null);
+  const chatInputRef = useRef(null);
+  const projectInputRef = useRef(null);
 
   useEffect(() => {
-    const timer =
-      setInterval(() => {
-        setCurrentTime(
-          new Date()
-        );
-      }, 1000);
-
-    return () => {
-      clearInterval(timer);
-    };
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
   }, []);
 
   /* =========================================================
-     SPEECH RECOGNITION
-  ========================================================= */
+     LOCAL PROJECT MEMORY
+     Keeps project chats and notes available after refresh.
+     ========================================================= */
+  useEffect(() => {
+    try {
+      const savedMessages = localStorage.getItem("shezorax-project-messages");
+      const savedNotes = localStorage.getItem("shezorax-project-notes");
 
+      if (savedMessages) {
+        setProjectMessages(JSON.parse(savedMessages));
+      }
+
+      if (savedNotes) {
+        setProjectNotes(JSON.parse(savedNotes));
+      }
+    } catch (error) {
+      console.warn("ShezoraX local project memory could not be restored.", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        "shezorax-project-messages",
+        JSON.stringify(projectMessages)
+      );
+    } catch (error) {
+      console.warn("Project messages could not be saved.", error);
+    }
+  }, [projectMessages]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        "shezorax-project-notes",
+        JSON.stringify(projectNotes)
+      );
+    } catch (error) {
+      console.warn("Project notes could not be saved.", error);
+    }
+  }, [projectNotes]);
+
+  /* =========================================================
+     VOICE INPUT
+     One recognition instance serves Home + every project chat.
+     ========================================================= */
   useEffect(() => {
     const SpeechRecognition =
       window.SpeechRecognition ||
@@ -1837,335 +1128,556 @@ function App() {
       return undefined;
     }
 
-    const recognition =
-      new SpeechRecognition();
+    const recognition = new SpeechRecognition();
 
-    recognition.lang =
-      "en-US";
+    recognition.lang = "en-US";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
 
-    recognition.continuous =
-      false;
+    recognition.onstart = () => {
+      if (voiceTargetRef.current === "project") {
+        setProjectListening(true);
+      } else {
+        setIsListening(true);
+      }
+    };
 
-    recognition.interimResults =
-      false;
+    recognition.onend = () => {
+      setIsListening(false);
+      setProjectListening(false);
+    };
 
-    recognition.onstart =
-      () => {
-        setIsListening(
-          true
+    recognition.onerror = (event) => {
+      console.warn("ShezoraX voice recognition error:", event?.error);
+      setIsListening(false);
+      setProjectListening(false);
+    };
+
+    recognition.onresult = (event) => {
+      const transcript =
+        event?.results?.[0]?.[0]?.transcript?.trim() || "";
+
+      if (!transcript) return;
+
+      if (voiceTargetRef.current === "project") {
+        setProjectDraft((previous) =>
+          previous ? `${previous} ${transcript}` : transcript
         );
-      };
-
-    recognition.onend =
-      () => {
-        setIsListening(
-          false
+      } else {
+        setMessage((previous) =>
+          previous ? `${previous} ${transcript}` : transcript
         );
-      };
+      }
+    };
 
-    recognition.onerror =
-      () => {
-        setIsListening(
-          false
-        );
-      };
-
-    recognition.onresult =
-      (event) => {
-        const transcript =
-          event.results[0][0]
-            .transcript;
-
-        setMessage(
-          transcript
-        );
-      };
-
-    recognitionRef.current =
-      recognition;
+    recognitionRef.current = recognition;
 
     return () => {
       try {
         recognition.stop();
       } catch {
-        /* Already stopped */
+        // Recognition may already be stopped.
       }
+      recognitionRef.current = null;
     };
   }, []);
 
   /* =========================================================
-     TEXT TO SPEECH
-  ========================================================= */
+     VOICE OUTPUT
+     ========================================================= */
+  const speakText = (text, force = false) => {
+    if (!("speechSynthesis" in window) || !text) {
+      return;
+    }
 
-  const speakText =
-    (text) => {
-      if (
+    if (!force && !voiceReplies) {
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voices = window.speechSynthesis.getVoices();
+
+    const preferredVoice = voices.find((voice) => {
+      const name = voice.name.toLowerCase();
+
+      if (selectedVoice === "Zeenora") {
+        return (
+          voice.lang.startsWith("en") &&
+          (
+            name.includes("zira") ||
+            name.includes("samantha") ||
+            name.includes("aria") ||
+            name.includes("jenny") ||
+            name.includes("ava") ||
+            name.includes("susan") ||
+            name.includes("female")
+          )
+        );
+      }
+
+      return (
+        voice.lang.startsWith("en") &&
         !(
-          "speechSynthesis" in
-          window
+          name.includes("zira") ||
+          name.includes("samantha") ||
+          name.includes("aria") ||
+          name.includes("jenny") ||
+          name.includes("ava") ||
+          name.includes("susan") ||
+          name.includes("female")
         )
-      ) {
-        return;
-      }
+      );
+    });
 
+    if (preferredVoice) {
+      utterance.voice = preferredVoice;
+    }
+
+    utterance.rate = 0.98;
+    utterance.pitch = 1.02;
+    utterance.volume = 1;
+
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const stopSpeaking = () => {
+    if ("speechSynthesis" in window) {
       window.speechSynthesis.cancel();
+    }
+    setIsSpeaking(false);
+  };
 
-      const utterance =
-        new SpeechSynthesisUtterance(
-          text
-        );
+  const handleSettingsSection = (section) => {
+    setSettingsSection(section);
+    setAccountOpen(false);
+  };
 
-      const voices =
-        window.speechSynthesis.getVoices();
+  const handleDeleteAllChats = () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete all ShezoraX chats?"
+    );
 
-      const preferredVoice =
-        voices.find(
-          (voice) => {
-            const name =
-              voice.name.toLowerCase();
+    if (!confirmed) return;
 
-            return (
-              voice.lang.startsWith(
-                "en"
-              ) &&
-              (
-                name.includes(
-                  "female"
-                ) ||
-                name.includes(
-                  "zira"
-                ) ||
-                name.includes(
-                  "samantha"
-                ) ||
-                name.includes(
-                  "aria"
-                ) ||
-                name.includes(
-                  "jenny"
-                )
-              )
-            );
-          }
-        );
+    setMessages([]);
+    setProjectMessages({});
+    setProjectNotes({});
 
-      if (preferredVoice) {
-        utterance.voice =
-          preferredVoice;
-      }
+    localStorage.removeItem("shezorax-project-messages");
+    localStorage.removeItem("shezorax-project-notes");
 
-      utterance.rate = 1;
-      utterance.pitch = 1.05;
-      utterance.volume = 1;
+    alert("All chats have been deleted.");
+  };
 
-      utterance.onstart =
-        () => {
-          setIsSpeaking(
-            true
-          );
-        };
+  const handleDeleteAccount = () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete your ShezoraX account?"
+    );
 
-      utterance.onend =
-        () => {
-          setIsSpeaking(
-            false
-          );
-        };
+    if (!confirmed) return;
 
-      utterance.onerror =
-        () => {
-          setIsSpeaking(
-            false
-          );
-        };
+    alert(
+      "Account deletion requires a real authentication backend. Your local project data can be removed separately."
+    );
+  };
 
-      window.speechSynthesis.speak(
-        utterance
+  const handleLogoutAllDevices = () => {
+    alert(
+      "Log out of all devices requires a real authentication/session backend."
+    );
+  };
+
+  const handleGoogleConnect = () => {
+    setGoogleConnected(true);
+
+    alert(
+      "Google account connection UI is ready. Real Google OAuth credentials are required for live authentication."
+    );
+  };
+
+  const handleAppleConnect = () => {
+    setAppleConnected(true);
+
+    alert(
+      "Apple ID connection UI is ready. Real Apple Sign In credentials are required for live authentication."
+    );
+  };
+
+  const startListening = (target = "general") => {
+    if (!recognitionRef.current) {
+      alert(
+        "Voice recognition is not supported in this browser. Try Google Chrome or Microsoft Edge."
       );
-    };
+      return;
+    }
 
-  /* =========================================================
-     SEND MESSAGE
-  ========================================================= */
+    const currentlyListening =
+      target === "project" ? projectListening : isListening;
 
-  const sendMessage =
-    async (
-      customMessage
-    ) => {
-      const text =
-        typeof customMessage ===
-        "string"
-          ? customMessage.trim()
-          : message.trim();
-
-      if (
-        !text ||
-        loading
-      ) {
-        return;
-      }
-
-      setActivePage(
-        "AI Chat"
-      );
-
-      setMessages(
-        (previous) => [
-          ...previous,
-          {
-            role: "user",
-            text,
-          },
-        ]
-      );
-
-      setMessage("");
-
-      setLoading(true);
-
+    if (currentlyListening) {
       try {
-        const response =
-          await fetch(
-            API_BASE +
-              "/api/chat",
-            {
-              method: "POST",
-
-              headers: {
-                "Content-Type":
-                  "application/json",
-              },
-
-              body: JSON.stringify({
-                message: text,
-              }),
-            }
-          );
-
-        const data =
-          await response.json();
-
-        if (
-          !response.ok ||
-          !data.success
-        ) {
-          throw new Error(
-            data.error ||
-              "AI response failed"
-          );
-        }
-
-        const reply =
-          data.reply ||
-          "I received your message, but no response was returned.";
-
-        setMessages(
-          (previous) => [
-            ...previous,
-            {
-              role: "ai",
-              text: reply,
-            },
-          ]
-        );
-
-        speakText(reply);
-      } catch (error) {
-        console.error(
-          "ShezoraX Chat Error:",
-          error
-        );
-
-        const errorMessage =
-          "I'm unable to connect to my AI service right now. Please check that the ShezoraX backend is running.";
-
-        setMessages(
-          (previous) => [
-            ...previous,
-            {
-              role: "ai",
-              text: errorMessage,
-            },
-          ]
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-  /* =========================================================
-     VOICE INPUT
-  ========================================================= */
-
-  const startListening =
-    () => {
-      if (
-        !recognitionRef.current
-      ) {
-        alert(
-          "Voice recognition is not supported in this browser."
-        );
-
-        return;
-      }
-
-      if (isListening) {
-        try {
-          recognitionRef.current.stop();
-        } catch {
-          /* Already stopped */
-        }
-
-        return;
-      }
-
-      try {
-        recognitionRef.current.start();
+        recognitionRef.current.stop();
       } catch {
-        setIsListening(
-          false
+        // Already stopped.
+      }
+      return;
+    }
+
+    voiceTargetRef.current = target;
+
+    try {
+      recognitionRef.current.start();
+    } catch (error) {
+      console.warn("Voice recognition could not start:", error);
+    }
+  };
+
+  /* =========================================================
+     GENERAL AI CHAT
+     ========================================================= */
+  const sendMessage = async (customMessage) => {
+    const text =
+      typeof customMessage === "string"
+        ? customMessage.trim()
+        : message.trim();
+
+    if (!text || loading) {
+      return;
+    }
+
+    setActivePage("AI Chat");
+
+    setMessages((previous) => [
+      ...previous,
+      {
+        role: "user",
+        text,
+      },
+    ]);
+
+    setMessage("");
+    setLoading(true);
+
+    try {
+      const response = await fetch(API_BASE + "/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: text,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "AI response failed");
+      }
+
+      const reply =
+        data.reply ||
+        "I received your message, but no response was returned.";
+
+      setMessages((previous) => [
+        ...previous,
+        {
+          role: "ai",
+          text: reply,
+        },
+      ]);
+
+      speakText(reply);
+    } catch (error) {
+      console.error("ShezoraX Chat Error:", error);
+
+      setMessages((previous) => [
+        ...previous,
+        {
+          role: "ai",
+          text:
+            "I'm unable to connect to the AI service right now. Please check that the ShezoraX backend is running.",
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* =========================================================
+     PROJECT AI CHAT
+     Every project type has isolated context + voice.
+     ========================================================= */
+  const sendProjectMessage = async (customMessage) => {
+    if (!selectedProject || projectLoading) {
+      return;
+    }
+
+    const text =
+      typeof customMessage === "string"
+        ? customMessage.trim()
+        : projectDraft.trim();
+
+    if (!text) {
+      return;
+    }
+
+    const project = getProjectType(selectedProject);
+    const existing = projectMessages[selectedProject] || [];
+
+    const userItem = {
+      role: "user",
+      text,
+    };
+
+    setProjectMessages((previous) => ({
+      ...previous,
+      [selectedProject]: [...existing, userItem],
+    }));
+
+    setProjectDraft("");
+    setProjectLoading(true);
+    setProjectTab("chat");
+
+    try {
+      const recentContext = [...existing, userItem]
+        .slice(-10)
+        .map(
+          (item) =>
+            `${item.role === "user" ? "User" : "ShezoraX"}: ${item.text}`
+        )
+        .join("\n");
+
+      const savedNote = projectNotes[selectedProject] || "";
+
+      const response = await fetch(API_BASE + "/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message:
+            `You are ShezoraX working inside a ${project.title} workspace. ` +
+            `Help the user plan, build and complete this project. ` +
+            `Give practical, structured answers. Keep the project type in context. ` +
+            `Do not pretend to create files or deploy code unless the user actually provides the required tools/files.\n\n` +
+            `Project type: ${project.title}\n` +
+            `Project notes: ${savedNote || "No saved notes yet."}\n\n` +
+            `Recent conversation:\n${recentContext}`,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(
+          data.error || "Project AI response failed"
         );
       }
-    };
 
-  /* =========================================================
-     STOP SPEAKING
-  ========================================================= */
+      const reply =
+        data.reply ||
+        "I received your project request, but no response was returned.";
 
-  const stopSpeaking =
-    () => {
-      if (
-        "speechSynthesis" in
-        window
-      ) {
-        window.speechSynthesis.cancel();
+      setProjectMessages((previous) => ({
+        ...previous,
+        [selectedProject]: [
+          ...(previous[selectedProject] || []),
+          {
+            role: "ai",
+            text: reply,
+          },
+        ],
+      }));
+
+      if (autoSpeakProject) {
+        speakText(reply);
       }
+    } catch (error) {
+      console.error("ShezoraX Project Error:", error);
 
-      setIsSpeaking(
-        false
-      );
-    };
+      setProjectMessages((previous) => ({
+        ...previous,
+        [selectedProject]: [
+          ...(previous[selectedProject] || []),
+          {
+            role: "ai",
+            text:
+              "I'm unable to connect to the AI service right now. Please check that the ShezoraX backend is running.",
+          },
+        ],
+      }));
+    } finally {
+      setProjectLoading(false);
+    }
+  };
 
-  /* =========================================================
-     ENTER KEY
-  ========================================================= */
+  const openProject = (projectId) => {
+    setSelectedProject(projectId);
+    setActivePage("Projects");
+    setProjectDraft("");
+    setProjectTab("chat");
+    setAccountOpen(false);
+  };
 
-  const handleKeyDown =
-    (event) => {
-      if (
-        event.key ===
-          "Enter" &&
-        !event.shiftKey
-      ) {
-        event.preventDefault();
+  const closeProject = () => {
+    setSelectedProject(null);
+    setProjectDraft("");
+    setProjectTab("chat");
+  };
 
-        sendMessage();
-      }
-    };
+  const clearProjectChat = () => {
+    if (!selectedProject) return;
 
-  /* =========================================================
-     SUGGESTIONS
-  ========================================================= */
+    const project = getProjectType(selectedProject);
+
+    if (
+      !window.confirm(
+        `Clear the ${project.title} conversation?`
+      )
+    ) {
+      return;
+    }
+
+    setProjectMessages((previous) => {
+      const next = { ...previous };
+      delete next[selectedProject];
+      return next;
+    });
+
+    stopSpeaking();
+  };
+
+  const updateProjectNote = (value) => {
+    if (!selectedProject) return;
+
+    setProjectNotes((previous) => ({
+      ...previous,
+      [selectedProject]: value,
+    }));
+  };
+
+  const copyProjectConversation = async () => {
+    if (!selectedProject) return;
+
+    const project = getProjectType(selectedProject);
+    const chat = projectMessages[selectedProject] || [];
+
+    if (!chat.length) {
+      return;
+    }
+
+    const text = [
+      `ShezoraX — ${project.title}`,
+      "",
+      ...chat.map(
+        (item) =>
+          `${item.role === "user" ? "You" : "ShezoraX"}:\n${item.text}`
+      ),
+    ].join("\n\n");
+
+    try {
+      await navigator.clipboard.writeText(text);
+      setProjectCopied(true);
+      window.setTimeout(() => setProjectCopied(false), 1400);
+    } catch (error) {
+      console.warn("Could not copy project conversation.", error);
+    }
+  };
+
+  const downloadProjectBrief = () => {
+    if (!selectedProject) return;
+
+    const project = getProjectType(selectedProject);
+    const chat = projectMessages[selectedProject] || [];
+    const note = projectNotes[selectedProject] || "";
+
+    const content = [
+      "SHEZORAX PROJECT BRIEF",
+      "=======================",
+      `Project Type: ${project.title}`,
+      "",
+      "Project Notes:",
+      note || "No notes added.",
+      "",
+      "Conversation:",
+      ...(
+        chat.length
+          ? chat.map(
+              (item) =>
+                `${item.role === "user" ? "You" : "ShezoraX"}:\n${item.text}\n`
+            )
+          : ["No conversation yet."]
+      ),
+    ].join("\n");
+
+    const blob = new Blob([content], {
+      type: "text/plain;charset=utf-8",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download =
+      `${project.id}-shezorax-project-brief.txt`;
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const triggerRocketLaunch = (button) => {
+    if (button) {
+      button.classList.remove("rocket-launching");
+      void button.offsetWidth;
+      button.classList.add("rocket-launching");
+
+      window.setTimeout(() => {
+        button.classList.remove("rocket-launching");
+      }, 900);
+    }
+
+    window.dispatchEvent(
+      new CustomEvent("shezorax:rocket-launch")
+    );
+  };
+
+  const handleGeneralKeyDown = (event) => {
+    if (
+      event.key === "Enter" &&
+      !event.shiftKey
+    ) {
+      event.preventDefault();
+      sendMessage();
+    }
+  };
+
+  const handleProjectKeyDown = (event) => {
+    if (
+      event.key === "Enter" &&
+      !event.shiftKey
+    ) {
+      event.preventDefault();
+      sendProjectMessage();
+    }
+  };
+
+  const focusGeneralChat = () => {
+    setActivePage("AI Chat");
+
+    window.setTimeout(() => {
+      chatInputRef.current?.focus();
+    }, 40);
+  };
 
   const suggestions = [
     "Explain something to me",
@@ -2174,463 +1686,1255 @@ function App() {
     "Help me build a project",
   ];
 
-  /* =========================================================
-     MODULE RENDER
-  ========================================================= */
+  const renderGeneralChat = () => (
+    <section className="chat-section module-chat-section">
+      <div className="chat-card">
+        <div className="chat-header">
+          <div>
+            <span className="eyebrow">PERSONAL AI</span>
+            <h2>Talk with ShezoraX</h2>
+          </div>
 
-  const renderModule =
-    () => {
-      if (
-        activePage ===
-        "Home"
-      ) {
-        return (
-          <>
-            <section className="hero-section">
-              <div className="hero-content">
-                <div className="status-pill">
-                  <span className="status-dot" />
-                  ShezoraX AI Online
-                </div>
+          <button
+            type="button"
+            className={
+              "voice-button " +
+              (isListening ? "active" : "")
+            }
+            onClick={() => startListening("general")}
+          >
+            {isListening ? "Listening…" : "Speak"}
+          </button>
+        </div>
 
-                <h1 className="greeting">
-                  {getGreeting()},
-                  Owais.
-                </h1>
-
-                <p className="hero-description">
-                  Your intelligent
-                  personal AI
-                  workspace for
-                  learning, creating,
-                  exploring and
-                  getting things done.
-                </p>
-
-                <div className="hero-time">
-                  <strong>
-                    {formatTime(
-                      currentTime
-                    )}
-                  </strong>
-
-                  <span>
-                    {formatDate(
-                      currentTime
-                    )}
-                  </span>
+        <div className="conversation">
+          {messages.length === 0 ? (
+            <div className="empty-chat-state">
+              <span>READY</span>
+              <strong>Start a conversation with ShezoraX.</strong>
+              <p>
+                Ask a question, explain a problem, or describe what you want
+                to build.
+              </p>
+            </div>
+          ) : (
+            messages.map((item, index) => (
+              <div
+                key={`${item.role}-${index}`}
+                className={
+                  "message-row " +
+                  (item.role === "user"
+                    ? "user-message"
+                    : "ai-message")
+                }
+              >
+                <span className="message-role">
+                  {item.role === "user" ? "YOU" : "SHEZORAX"}
+                </span>
+                <div className="message-bubble">
+                  {item.text}
                 </div>
               </div>
-            </section>
+            ))
+          )}
 
-            <section className="chat-section">
-              <div className="chat-card">
-                <div className="chat-header">
-                  <div>
-                    <span className="eyebrow">
-                      PERSONAL AI
-                    </span>
+          {loading && (
+            <div className="message-row ai-message">
+              <span className="message-role">SHEZORAX</span>
+              <div className="message-bubble typing">
+                Thinking…
+              </div>
+            </div>
+          )}
+        </div>
 
-                    <h2>
-                      What can I help you with?
-                    </h2>
+        <div className="prompt-box">
+          <textarea
+            ref={chatInputRef}
+            value={message}
+            onChange={(event) => setMessage(event.target.value)}
+            onKeyDown={handleGeneralKeyDown}
+            placeholder="Ask ShezoraX anything…"
+            aria-label="Message ShezoraX"
+            rows={3}
+          />
+
+          <div className="prompt-actions">
+            <span>Enter to send · Shift + Enter for a new line</span>
+
+            <div className="prompt-action-group">
+              <button
+                type="button"
+                className={
+                  "listen-button " +
+                  (isListening ? "active" : "")
+                }
+                onClick={() => startListening("general")}
+              >
+                {isListening ? "Stop mic" : "Voice"}
+              </button>
+
+              <button
+                type="button"
+                className="send-button rocket-send-button"
+                onClick={(event) => {
+                  triggerRocketLaunch(event.currentTarget);
+                  sendMessage();
+                }}
+                disabled={loading || !message.trim()}
+                aria-label="Send message"
+                title="Send"
+              >
+                <span className="send-rocket-icon" aria-hidden="true">
+                  <svg viewBox="0 0 32 32" role="img">
+                    <path
+                      d="M19.8 3.2c4.2.1 7.9 3.7 8.9 8.7.7 3.5-.2 6.8-2.8 9.3l-3.2 3.2-3.6-3.6-4.4 4.4-2.3-2.3 4.4-4.4-3.6-3.6 3.2-3.2c2.5-2.5 5.2-3.5 8.4-3.5Z"
+                      fill="currentColor"
+                    />
+                    <path
+                      d="M11.2 18.8 6 20.1l-1.8 5.7 5.7-1.8 1.3-5.2-5.7 1.8Z"
+                      fill="currentColor"
+                      opacity=".7"
+                    />
+                    <circle
+                      cx="21.4"
+                      cy="11.8"
+                      r="2.1"
+                      fill="#020308"
+                    />
+                    <path
+                      d="M17.2 23.2c-.9 1.8-1.2 3.7-.8 5.4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </span>
+                <span className="send-rocket-label">Send</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+
+  const renderProjectWorkspace = () => {
+    if (!selectedProject) {
+      return (
+        <section className="module-page">
+          <div className="module-card projects-module-card">
+            <div className="module-heading-row">
+              <div>
+                <span className="eyebrow">PROJECTS</span>
+                <h1>Build something with ShezoraX</h1>
+                <p>
+                  Choose a project type. Each workspace has its own AI chat,
+                  voice input, voice replies, notes and saved conversation.
+                </p>
+              </div>
+            </div>
+
+            <div className="project-grid project-grid-wide">
+              {PROJECT_TYPES.map((project) => (
+                <button
+                  key={project.id}
+                  type="button"
+                  className="project-type-card"
+                  onClick={() => openProject(project.id)}
+                >
+                  <span className="project-type-icon">
+                    {project.icon}
+                  </span>
+                  <strong>{project.title}</strong>
+                  <span>{project.description}</span>
+                  <small>Open project workspace →</small>
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    const project = getProjectType(selectedProject);
+    const activeProjectMessages =
+      projectMessages[selectedProject] || [];
+    const currentNote = projectNotes[selectedProject] || "";
+
+    return (
+      <section className="module-page project-workspace-page">
+        <div className="module-card project-workspace-card">
+          <div className="project-workspace-head">
+            <div>
+              <button
+                type="button"
+                className="workspace-back-button"
+                onClick={closeProject}
+              >
+                ← All Projects
+              </button>
+
+              <span className="eyebrow">PROJECT WORKSPACE</span>
+              <h1>{project.title}</h1>
+              <p>{project.description}</p>
+            </div>
+
+            <div className="workspace-head-actions">
+              <button
+                type="button"
+                className="secondary-module-button"
+                onClick={downloadProjectBrief}
+              >
+                Export
+              </button>
+
+              <button
+                type="button"
+                className="secondary-module-button danger-soft"
+                onClick={clearProjectChat}
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+
+          <div className="project-tabs" role="tablist">
+            {[
+              ["chat", "AI Chat"],
+              ["plan", "Project Plan"],
+              ["notes", "Notes"],
+            ].map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                aria-selected={projectTab === id}
+                className={
+                  projectTab === id ? "active" : ""
+                }
+                onClick={() => setProjectTab(id)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {projectTab === "chat" && (
+            <div className="project-chat-panel">
+              <div className="project-chat-conversation">
+                {activeProjectMessages.length === 0 ? (
+                  <div className="empty-chat-state project-empty-state">
+                    <span>{project.icon}</span>
+                    <strong>
+                      Tell ShezoraX what you want to build.
+                    </strong>
+                    <p>
+                      Describe your idea, requirements, deadline, technology,
+                      assignment instructions or any problem you need solved.
+                    </p>
                   </div>
+                ) : (
+                  activeProjectMessages.map((item, index) => (
+                    <div
+                      key={`${item.role}-${index}`}
+                      className={
+                        "message-row " +
+                        (item.role === "user"
+                          ? "user-message"
+                          : "ai-message")
+                      }
+                    >
+                      <span className="message-role">
+                        {item.role === "user"
+                          ? "YOU"
+                          : "SHEZORAX"}
+                      </span>
 
-                  <button
-                    className={
-                      "voice-button " +
-                      (isSpeaking
-                        ? "active"
-                        : "")
-                    }
-                    onClick={
-                      isSpeaking
-                        ? stopSpeaking
-                        : startListening
-                    }
-                    type="button"
-                  >
-                    {isSpeaking
-                      ? "Stop Voice"
-                      : "Voice"}
-                  </button>
-                </div>
-
-                <div className="conversation">
-                  {messages.length ===
-                    0 && (
-                    <div className="empty-conversation">
-                      <p>
-                        Start a
-                        conversation
-                        with ShezoraX.
-                      </p>
-                    </div>
-                  )}
-
-                  {messages.map(
-                    (
-                      item,
-                      index
-                    ) => (
-                      <div
-                        className={
-                          "message-row " +
-                          (item.role ===
-                          "user"
-                            ? "user-message"
-                            : "ai-message")
-                        }
-                        key={index}
-                      >
-                        <div className="message-bubble">
-                          {item.text}
-                        </div>
-
-                        {item.role ===
-                          "ai" && (
-                          <button
-                            className="listen-button"
-                            type="button"
-                            onClick={() =>
-                              speakText(
-                                item.text
-                              )
-                            }
-                          >
-                            Listen
-                          </button>
-                        )}
+                      <div className="message-bubble">
+                        {item.text}
                       </div>
-                    )
-                  )}
 
-                  {loading && (
-                    <div className="message-row ai-message">
-                      <div className="message-bubble typing">
-                        <span />
-                        <span />
-                        <span />
-                      </div>
+                      {item.role === "ai" && (
+                        <button
+                          type="button"
+                          className="listen-button response-listen-button"
+                          onClick={() => speakText(item.text, true)}
+                        >
+                          🔊 Speak
+                        </button>
+                      )}
                     </div>
-                  )}
-                </div>
+                  ))
+                )}
 
-                <div className="prompt-box">
-                  <textarea
-                    value={message}
-                    onChange={(
-                      event
-                    ) =>
-                      setMessage(
-                        event.target.value
-                      )
-                    }
-                    onKeyDown={
-                      handleKeyDown
-                    }
-                    placeholder={
-                      isListening
-                        ? "Listening..."
-                        : "Ask ShezoraX anything..."
-                    }
-                    rows="1"
-                  />
+                {projectLoading && (
+                  <div className="message-row ai-message">
+                    <span className="message-role">SHEZORAX</span>
+                    <div className="message-bubble typing">
+                      Working on your project…
+                    </div>
+                  </div>
+                )}
+              </div>
 
-                  <div className="prompt-actions">
+              <div className="prompt-box project-prompt-box">
+                <textarea
+                  ref={projectInputRef}
+                  value={projectDraft}
+                  onChange={(event) =>
+                    setProjectDraft(event.target.value)
+                  }
+                  onKeyDown={handleProjectKeyDown}
+                  placeholder={`Describe your ${project.title.toLowerCase()} request…`}
+                  aria-label={`Message ShezoraX about ${project.title}`}
+                  rows={4}
+                />
+
+                <div className="prompt-actions">
+                  <span>
+                    {projectListening
+                      ? "Listening… speak now"
+                      : "Voice + text supported"}
+                  </span>
+
+                  <div className="prompt-action-group">
                     <button
                       type="button"
                       className={
                         "listen-button " +
-                        (isListening
-                          ? "active"
-                          : "")
+                        (projectListening ? "active" : "")
                       }
-                      onClick={
-                        startListening
-                      }
+                      onClick={() => startListening("project")}
                     >
-                      {isListening
-                        ? "Listening"
-                        : "Speak"}
+                      {projectListening
+                        ? "Stop mic"
+                        : "Voice"}
                     </button>
 
                     <button
                       type="button"
-                      className="send-button"
-                      onClick={() =>
-                        sendMessage()
-                      }
+                      className="send-button rocket-send-button"
+                      onClick={(event) => {
+                        triggerRocketLaunch(event.currentTarget);
+                        sendProjectMessage();
+                      }}
                       disabled={
-                        loading ||
-                        !message.trim()
+                        projectLoading ||
+                        !projectDraft.trim()
                       }
-                      aria-label="Send message"
-                      title="Send"
+                      aria-label="Send project request"
+                      title="Send project request"
                     >
-                      <span>
+                      <span
+                        className="send-rocket-icon"
+                        aria-hidden="true"
+                      >
+                        <svg viewBox="0 0 32 32" role="img">
+                          <path
+                            d="M19.8 3.2c4.2.1 7.9 3.7 8.9 8.7.7 3.5-.2 6.8-2.8 9.3l-3.2 3.2-3.6-3.6-4.4 4.4-2.3-2.3 4.4-4.4-3.6-3.6 3.2-3.2c2.5-2.5 5.2-3.5 8.4-3.5Z"
+                            fill="currentColor"
+                          />
+                          <path
+                            d="M11.2 18.8 6 20.1l-1.8 5.7-2.3-2.3 1.8-5.7 5.2-1.3-1.8 5.7Z"
+                            fill="currentColor"
+                            opacity=".7"
+                          />
+                          <circle
+                            cx="21.4"
+                            cy="11.8"
+                            r="2.1"
+                            fill="#020308"
+                          />
+                          <path
+                            d="M17.2 23.2c-.9 1.8-1.2 3.7-.8 5.4"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                      </span>
+                      <span className="send-rocket-label">
                         Send
                       </span>
                     </button>
                   </div>
                 </div>
               </div>
-            </section>
+            </div>
+          )}
 
-            <section className="suggestion-section">
-              <span className="eyebrow">
-                EXPLORE SHEZORAX
-              </span>
+          {projectTab === "plan" && (
+            <div className="project-plan-panel">
+              <div className="plan-intro">
+                <span className="eyebrow">WORKFLOW</span>
+                <h2>Build your project step by step</h2>
+                <p>
+                  Use these stages to keep the project organized. You can ask
+                  ShezoraX to handle any stage from the AI Chat tab.
+                </p>
+              </div>
 
-              <div className="suggestion-grid">
-                {suggestions.map(
-                  (item) => (
-                    <button
-                      type="button"
-                      className="suggestion-card"
-                      key={item}
-                      onClick={() =>
-                        sendMessage(
-                          item
-                        )
+              <div className="project-plan-grid">
+                {[
+                  ["01", "Define", "Explain the goal, audience and final result."],
+                  ["02", "Plan", "Choose features, technology and milestones."],
+                  ["03", "Build", "Create the code, content or project material."],
+                  ["04", "Test", "Review errors, requirements and edge cases."],
+                  ["05", "Polish", "Improve design, quality and presentation."],
+                  ["06", "Deliver", "Prepare the final files, documentation or presentation."],
+                ].map(([number, title, text]) => (
+                  <button
+                    type="button"
+                    className="plan-step-card"
+                    key={number}
+                    onClick={() =>
+                      sendProjectMessage(
+                        `Help me with project stage ${number}: ${title}. ${text}`
+                      )
+                    }
+                  >
+                    <span>{number}</span>
+                    <strong>{title}</strong>
+                    <small>{text}</small>
+                    <em>Ask ShezoraX →</em>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {projectTab === "notes" && (
+            <div className="project-notes-panel">
+              <div className="plan-intro">
+                <span className="eyebrow">PROJECT MEMORY</span>
+                <h2>Project notes</h2>
+                <p>
+                  Save requirements, links, deadlines, technologies or other
+                  context. Notes stay on this device and are included in future
+                  project AI requests.
+                </p>
+              </div>
+
+              <textarea
+                className="project-notes-input"
+                value={currentNote}
+                onChange={(event) =>
+                  updateProjectNote(event.target.value)
+                }
+                placeholder="Example: React + Node.js, deadline Friday, must be mobile responsive…"
+              />
+
+              <div className="notes-footer">
+                <span>
+                  {currentNote.length} characters · saved locally
+                </span>
+                <button
+                  type="button"
+                  className="primary-module-button"
+                  onClick={() => setProjectTab("chat")}
+                >
+                  Back to Chat
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="project-workspace-footer">
+            <span>
+              {project.title} ·{" "}
+              {activeProjectMessages.length} messages
+            </span>
+
+            <button
+              type="button"
+              className="listen-button"
+              onClick={copyProjectConversation}
+              disabled={!activeProjectMessages.length}
+            >
+              {projectCopied ? "Copied" : "Copy conversation"}
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  };
+
+  const renderModule = () => {
+    if (activePage === "Home") {
+      return (
+        <>
+          <section className="hero-section">
+            <div className="hero-content">
+              <div className="status-pill">
+                <span className="status-dot" />
+                ShezoraX AI Online
+              </div>
+
+              <h1 className="greeting">
+                {getGreeting()}, Owais.
+              </h1>
+
+              <p className="hero-description">
+                Your intelligent personal AI workspace for learning, creating,
+                exploring and getting things done.
+              </p>
+
+              <div className="hero-time">
+                <strong>{formatTime(currentTime)}</strong>
+                <span>{formatDate(currentTime)}</span>
+              </div>
+            </div>
+          </section>
+
+          <section className="chat-section">
+            <div className="chat-card">
+              <div className="chat-header">
+                <div>
+                  <span className="eyebrow">PERSONAL AI</span>
+                  <h2>What can I help you with?</h2>
+                </div>
+
+                <button
+                  type="button"
+                  className={
+                    "voice-button " +
+                    (isListening ? "active" : "")
+                  }
+                  onClick={() => startListening("general")}
+                >
+                  {isListening ? "Listening…" : "Speak"}
+                </button>
+              </div>
+
+              <div className="conversation">
+                {messages.length === 0 ? (
+                  <div className="empty-chat-state">
+                    <span>READY</span>
+                    <strong>
+                      Ask ShezoraX anything.
+                    </strong>
+                    <p>
+                      You can also use the microphone or one of the quick
+                      prompts below.
+                    </p>
+                  </div>
+                ) : (
+                  messages.map((item, index) => (
+                    <div
+                      key={`${item.role}-${index}`}
+                      className={
+                        "message-row " +
+                        (item.role === "user"
+                          ? "user-message"
+                          : "ai-message")
                       }
                     >
-                      {item}
-                    </button>
-                  )
+                      <span className="message-role">
+                        {item.role === "user"
+                          ? "YOU"
+                          : "SHEZORAX"}
+                      </span>
+                      <div className="message-bubble">
+                        {item.text}
+                      </div>
+                    </div>
+                  ))
+                )}
+
+                {loading && (
+                  <div className="message-row ai-message">
+                    <span className="message-role">SHEZORAX</span>
+                    <div className="message-bubble typing">
+                      Thinking…
+                    </div>
+                  </div>
                 )}
               </div>
-            </section>
-          </>
-        );
-      }
 
-      if (
-        activePage ===
-        "AI Chat"
-      ) {
-        return (
-          <section className="module-page">
-            <div className="module-card">
-              <span className="eyebrow">
-                AI CHAT
-              </span>
+              <div className="prompt-box">
+                <textarea
+                  ref={chatInputRef}
+                  value={message}
+                  onChange={(event) => setMessage(event.target.value)}
+                  onKeyDown={handleGeneralKeyDown}
+                  placeholder="Ask ShezoraX anything…"
+                  rows={3}
+                />
 
-              <h1>
-                Talk with ShezoraX
-              </h1>
+                <div className="prompt-actions">
+                  <span>Voice input is available</span>
 
-              <p>
-                Ask questions,
-                learn new concepts,
-                plan projects or
-                explore ideas through
-                the AI assistant.
-              </p>
+                  <div className="prompt-action-group">
+                    <button
+                      type="button"
+                      className={
+                        "listen-button " +
+                        (isListening ? "active" : "")
+                      }
+                      onClick={() => startListening("general")}
+                    >
+                      {isListening ? "Stop mic" : "Voice"}
+                    </button>
 
-              <button
-                type="button"
-                className="primary-module-button"
-                onClick={() =>
-                  setActivePage(
-                    "Home"
-                  )
-                }
-              >
-                Open Chat
-              </button>
+                    <button
+                      type="button"
+                      className="send-button rocket-send-button"
+                      onClick={(event) => {
+                        triggerRocketLaunch(event.currentTarget);
+                        sendMessage();
+                      }}
+                      disabled={loading || !message.trim()}
+                      aria-label="Launch and send message"
+                      title="Launch & Send"
+                    >
+                      <span
+                        className="send-rocket-icon"
+                        aria-hidden="true"
+                      >
+                        <svg viewBox="0 0 32 32" role="img">
+                          <path
+                            d="M19.8 3.2c4.2.1 7.9 3.7 8.9 8.7.7 3.5-.2 6.8-2.8 9.3l-3.2 3.2-3.6-3.6-4.4 4.4-2.3-2.3 4.4-4.4-3.6-3.6 3.2-3.2c2.5-2.5 5.2-3.5 8.4-3.5Z"
+                            fill="currentColor"
+                          />
+                          <path
+                            d="M11.2 18.8 6 20.1l-1.8 5.7-1.8 5.7 5.7-1.8 1.3-5.2Z"
+                            fill="currentColor"
+                            opacity=".7"
+                          />
+                          <circle
+                            cx="21.4"
+                            cy="11.8"
+                            r="2.1"
+                            fill="#020308"
+                          />
+                          <path
+                            d="M17.2 23.2c-.9 1.8-1.2 3.7-.8 5.4"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                      </span>
+                      <span className="send-rocket-label">Send</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
-        );
-      }
 
-      if (
-        activePage ===
-        "Create"
-      ) {
-        return (
-          <section className="module-page">
-            <div className="module-card">
-              <span className="eyebrow">
-                CREATE
-              </span>
+          <section className="suggestion-section">
+            <span className="eyebrow">EXPLORE SHEZORAX</span>
 
-              <h1>
-                Create with AI
-              </h1>
-
-              <p>
-                Turn your ideas into
-                websites, documents,
-                concepts and creative
-                projects.
-              </p>
+            <div className="suggestion-grid">
+              {suggestions.map((item) => (
+                <button
+                  type="button"
+                  className="suggestion-card"
+                  key={item}
+                  onClick={() => sendMessage(item)}
+                >
+                  {item}
+                </button>
+              ))}
             </div>
           </section>
-        );
-      }
+        </>
+      );
+    }
 
-      if (
-        activePage ===
-        "Projects"
-      ) {
-        return (
-          <section className="module-page">
-            <div className="module-card">
-              <span className="eyebrow">
-                PROJECTS
-              </span>
+    if (activePage === "AI Chat") {
+      return (
+        <section className="module-page full-module-page">
+          <div className="full-module-width">
+            {renderGeneralChat()}
+          </div>
+        </section>
+      );
+    }
 
-              <h1>
-                Your Projects
-              </h1>
+    if (activePage === "Create") {
+      return (
+        <section className="module-page">
+          <div className="module-card create-module-card">
+            <span className="eyebrow">CREATE</span>
+            <h1>Choose what you want to create</h1>
+            <p>
+              Select a project type and ShezoraX will open a dedicated
+              workspace with its own AI conversation and voice controls.
+            </p>
 
-              <p>
-                Manage your personal
-                AI projects and keep
-                your work organized.
-              </p>
+            <div className="project-grid">
+              {PROJECT_TYPES.map((project) => (
+                <button
+                  key={project.id}
+                  type="button"
+                  className="project-type-card"
+                  onClick={() => openProject(project.id)}
+                >
+                  <span className="project-type-icon">
+                    {project.icon}
+                  </span>
+                  <strong>{project.title}</strong>
+                  <span>{project.description}</span>
+                  <small>Start with ShezoraX →</small>
+                </button>
+              ))}
             </div>
-          </section>
-        );
-      }
+          </div>
+        </section>
+      );
+    }
 
-      if (
-        activePage ===
-        "Knowledge"
-      ) {
-        return (
-          <section className="module-page">
-            <div className="module-card">
-              <span className="eyebrow">
-                KNOWLEDGE
-              </span>
+    if (activePage === "Projects") {
+      return renderProjectWorkspace();
+    }
 
-              <h1>
-                Knowledge Universe
-              </h1>
+    if (activePage === "Knowledge") {
+      const topics = [
+        "Universe & Space",
+        "Earth",
+        "Science",
+        "Technology",
+        "Programming",
+        "History",
+        "Mathematics",
+        "Physics",
+      ];
 
-              <p>
-                Explore science,
-                technology, Earth,
-                space, history,
-                learning and more.
-              </p>
+      return (
+        <section className="module-page">
+          <div className="module-card knowledge-module-card">
+            <span className="eyebrow">KNOWLEDGE</span>
+            <h1>Knowledge Universe</h1>
+            <p>
+              Pick a topic and ShezoraX will open the AI chat with a focused
+              question.
+            </p>
+
+            <div className="knowledge-actions">
+              {topics.map((topic) => (
+                <button
+                  key={topic}
+                  type="button"
+                  className="project-type-card"
+                  onClick={() =>
+                    sendMessage(
+                      `Teach me about ${topic}. Give me a clear, accurate and structured explanation.`
+                    )
+                  }
+                >
+                  <strong>{topic}</strong>
+                  <span>Ask ShezoraX →</span>
+                </button>
+              ))}
             </div>
-          </section>
-        );
-      }
+          </div>
+        </section>
+      );
+    }
 
-      if (
-        activePage ===
-        "Settings"
-      ) {
-        return (
-          <section className="module-page">
-            <div className="module-card">
-              <span className="eyebrow">
-                SETTINGS
-              </span>
+        if (activePage === "Settings") {
+      return (
+        <section className="module-page">
+          <div className="settings-page">
 
-              <h1>
-                ShezoraX Settings
-              </h1>
-
-              <p>
-                Customize your
-                interface, voice and
-                assistant experience.
-              </p>
-
-              <button
-                type="button"
-                className="primary-module-button"
-                onClick={() =>
-                  setDarkMode(
-                    (previous) =>
-                      !previous
-                  )
-                }
-              >
-                {darkMode
-                  ? "Switch to Light Mode"
-                  : "Switch to Dark Mode"}
-              </button>
+            <div className="settings-header">
+              <div>
+                <span className="eyebrow">SETTINGS</span>
+                <h1>Settings</h1>
+                <p>
+                  Manage your ShezoraX preferences, account and personal
+                  experience.
+                </p>
+              </div>
             </div>
-          </section>
-        );
-      }
 
-      return null;
-    };
+            <div className="settings-layout">
 
-  /* =========================================================
-     MAIN APP UI
-  ========================================================= */
+              <aside className="settings-sidebar">
+                <div className="settings-sidebar-title">
+                  Settings
+                </div>
+
+                <div className="settings-navigation">
+                  {SETTINGS_SECTIONS.map((section) => (
+                    <button
+                      key={section.id}
+                      type="button"
+                      className={
+                        "settings-navigation-item " +
+                        (settingsSection === section.id ? "active" : "")
+                      }
+                      onClick={() =>
+                        handleSettingsSection(section.id)
+                      }
+                    >
+                      <span className="settings-navigation-icon">
+                        {section.icon}
+                      </span>
+
+                      <span className="settings-navigation-copy">
+                        <strong>{section.title}</strong>
+                        <small>{section.description}</small>
+                      </span>
+
+                      <span className="settings-navigation-arrow">
+                        →
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </aside>
+
+              <div className="settings-content">
+
+                {settingsSection === "General" && (
+                  <div className="settings-section-content">
+                    <div className="settings-section-heading">
+                      <span className="eyebrow">GENERAL</span>
+                      <h2>General</h2>
+                      <p>
+                        Control the language and voice experience of
+                        ShezoraX.
+                      </p>
+                    </div>
+
+                    <div className="settings-group">
+
+                      <div className="settings-item">
+                        <div className="settings-item-copy">
+                          <strong>Language</strong>
+                          <span>
+                            Choose the language used throughout the
+                            ShezoraX interface.
+                          </span>
+                        </div>
+
+                        <select
+                          className="settings-select"
+                          value={selectedLanguage}
+                          onChange={(event) =>
+                            setSelectedLanguage(event.target.value)
+                          }
+                        >
+                          {SETTINGS_LANGUAGES.map((language) => (
+                            <option
+                              key={language}
+                              value={language}
+                            >
+                              {language}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="settings-item settings-item-column">
+                        <div className="settings-item-copy">
+                          <strong>Voice</strong>
+                          <span>
+                            Choose the AI voice ShezoraX uses for
+                            spoken responses.
+                          </span>
+                        </div>
+
+                        <div className="settings-voice-list">
+                          {SETTINGS_VOICES.map((voice) => (
+                            <button
+                              key={voice.id}
+                              type="button"
+                              className={
+                                "settings-voice-option " +
+                                (selectedVoice === voice.id
+                                  ? "active"
+                                  : "")
+                              }
+                              onClick={() =>
+                                setSelectedVoice(voice.id)
+                              }
+                            >
+                              <span className="settings-voice-avatar">
+                                {voice.gender === "Female"
+                                  ? "♀"
+                                  : "♂"}
+                              </span>
+
+                              <span className="settings-voice-copy">
+                                <strong>{voice.name}</strong>
+                                <small>
+                                  {voice.gender} · {voice.description}
+                                </small>
+                              </span>
+
+                              <span className="settings-check">
+                                {selectedVoice === voice.id
+                                  ? "✓"
+                                  : ""}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="settings-item">
+                        <div className="settings-item-copy">
+                          <strong>AI voice replies</strong>
+                          <span>
+                            ShezoraX speaks general AI responses when
+                            browser speech synthesis is available.
+                          </span>
+                        </div>
+
+                        <button
+                          type="button"
+                          className={
+                            "settings-toggle " +
+                            (voiceReplies ? "active" : "")
+                          }
+                          onClick={() =>
+                            setVoiceReplies(
+                              (previous) => !previous
+                            )
+                          }
+                          aria-pressed={voiceReplies}
+                        >
+                          {voiceReplies ? "ON" : "OFF"}
+                        </button>
+                      </div>
+
+                      <div className="settings-item">
+                        <div className="settings-item-copy">
+                          <strong>Project voice replies</strong>
+                          <span>
+                            Automatically speak responses inside
+                            project workspaces.
+                          </span>
+                        </div>
+
+                        <button
+                          type="button"
+                          className={
+                            "settings-toggle " +
+                            (autoSpeakProject ? "active" : "")
+                          }
+                          onClick={() =>
+                            setAutoSpeakProject(
+                              (previous) => !previous
+                            )
+                          }
+                          aria-pressed={autoSpeakProject}
+                        >
+                          {autoSpeakProject ? "ON" : "OFF"}
+                        </button>
+                      </div>
+
+                    </div>
+
+                    <div className="settings-actions">
+                      <button
+                        type="button"
+                        className="primary-module-button"
+                        onClick={() =>
+                          speakText(
+                            `Hello Owais. This is ${selectedVoice}.`,
+                            true
+                          )
+                        }
+                      >
+                        Test Voice
+                      </button>
+
+                      <button
+                        type="button"
+                        className="secondary-module-button"
+                        onClick={() =>
+                          startListening("general")
+                        }
+                      >
+                        Test Microphone
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {settingsSection === "Profile" && (
+                  <div className="settings-section-content">
+                    <div className="settings-section-heading">
+                      <span className="eyebrow">PROFILE</span>
+                      <h2>Profile</h2>
+                      <p>
+                        Manage your ShezoraX account and personal
+                        data.
+                      </p>
+                    </div>
+
+                    <div className="settings-group">
+
+                      <div className="settings-item">
+                        <div className="settings-item-copy">
+                          <strong>Google email</strong>
+                          <span>
+                            Connected account
+                          </span>
+                        </div>
+
+                        <div className="settings-account-value">
+                          ow••••@gmail.com
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="settings-action-item"
+                        onClick={handleLogoutAllDevices}
+                      >
+                        <span>
+                          <strong>
+                            Log out of all devices
+                          </strong>
+                          <small>
+                            End active ShezoraX sessions on other
+                            devices.
+                          </small>
+                        </span>
+
+                        <b>→</b>
+                      </button>
+
+                      <button
+                        type="button"
+                        className="settings-action-item danger"
+                        onClick={handleDeleteAllChats}
+                      >
+                        <span>
+                          <strong>Delete all chats</strong>
+                          <small>
+                            Remove your ShezoraX conversations and
+                            project chat memory from this device.
+                          </small>
+                        </span>
+
+                        <b>→</b>
+                      </button>
+
+                      <button
+                        type="button"
+                        className="settings-action-item danger"
+                        onClick={handleDeleteAccount}
+                      >
+                        <span>
+                          <strong>Delete account</strong>
+                          <small>
+                            Permanently delete your ShezoraX account
+                            when account authentication is connected.
+                          </small>
+                        </span>
+
+                        <b>→</b>
+                      </button>
+
+                    </div>
+                  </div>
+                )}
+
+                {settingsSection === "Google Account" && (
+                  <div className="settings-section-content">
+                    <div className="settings-section-heading">
+                      <span className="eyebrow">
+                        GOOGLE ACCOUNT
+                      </span>
+
+                      <h2>Google Account</h2>
+
+                      <p>
+                        Connect your Google account to use account
+                        authentication with ShezoraX.
+                      </p>
+                    </div>
+
+                    <div className="settings-provider-card google-provider">
+                      <div className="settings-provider-icon">
+                        G
+                      </div>
+
+                      <div className="settings-provider-copy">
+                        <strong>Google</strong>
+
+                        <span>
+                          {googleConnected
+                            ? "Google connection is ready."
+                            : "Connect your Google account to ShezoraX."}
+                        </span>
+
+                        <small>
+                          Real Google OAuth requires configured
+                          authentication credentials.
+                        </small>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="settings-provider-button"
+                        onClick={handleGoogleConnect}
+                      >
+                        {googleConnected
+                          ? "Connected"
+                          : "Continue with Google"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {settingsSection === "Apple ID" && (
+                  <div className="settings-section-content">
+                    <div className="settings-section-heading">
+                      <span className="eyebrow">
+                        APPLE ID
+                      </span>
+
+                      <h2>Apple ID</h2>
+
+                      <p>
+                        Connect your Apple ID to use Apple account
+                        authentication with ShezoraX.
+                      </p>
+                    </div>
+
+                    <div className="settings-provider-card apple-provider">
+                      <div className="settings-provider-icon">
+                        
+                      </div>
+
+                      <div className="settings-provider-copy">
+                        <strong>Apple ID</strong>
+
+                        <span>
+                          {appleConnected
+                            ? "Apple ID connection is ready."
+                            : "Connect your Apple ID to ShezoraX."}
+                        </span>
+
+                        <small>
+                          Real Apple Sign In requires configured
+                          authentication credentials.
+                        </small>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="settings-provider-button"
+                        onClick={handleAppleConnect}
+                      >
+                        {appleConnected
+                          ? "Connected"
+                          : "Continue with Apple"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {settingsSection === "Religion & Faith" && (
+                  <div className="settings-section-content">
+                    <div className="settings-section-heading">
+                      <span className="eyebrow">
+                        RELIGION & FAITH
+                      </span>
+
+                      <h2>Religion & Faith</h2>
+
+                      <p>
+                        Manage the religious and faith-related
+                        preferences used by ShezoraX.
+                      </p>
+                    </div>
+
+                    <div className="settings-group">
+
+                      <div className="settings-info-card">
+                        <strong>Faith preferences</strong>
+
+                        <span>
+                          This area is reserved for your religious
+                          knowledge, prayer and faith-related
+                          preferences.
+                        </span>
+                      </div>
+
+                      <div className="settings-item">
+                        <div className="settings-item-copy">
+                          <strong>Religious knowledge</strong>
+                          <span>
+                            ShezoraX can keep religious topics separate
+                            from general application preferences.
+                          </span>
+                        </div>
+
+                        <span className="settings-status">
+                          Ready
+                        </span>
+                      </div>
+
+                    </div>
+                  </div>
+                )}
+
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    return null;
+  };
 
   return (
-    <div
-      className={
-        "app " +
-        (darkMode
-          ? "dark-mode"
-          : "light-mode")
-      }
-    >
+    <div className="app dark-mode">
       <div className="real-universe-background">
         <SpaceScene />
-
         <div className="universe-overlay" />
       </div>
 
       <aside className="sidebar">
         <div className="brand">
-          <div className="brand-orbit">
-            S
-          </div>
+          <div className="brand-orbit">S</div>
 
           <div>
-            <strong>
-              ShezoraX
-            </strong>
-
-            <span>
-              PERSONAL AI
-            </span>
+            <strong>ShezoraX</strong>
+            <span>PERSONAL AI</span>
           </div>
         </div>
 
-        <nav className="sidebar-nav">
+        <nav className="sidebar-nav" aria-label="Main navigation">
           {[
-            "Home",
-            "AI Chat",
-            "Create",
-            "Projects",
-            "Knowledge",
-            "Settings",
-          ].map(
-            (item) => (
-              <button
-                type="button"
-                key={item}
-                className={
-                  activePage ===
-                  item
-                    ? "active"
-                    : ""
+            ["Home", "⌂"],
+            ["AI Chat", "✦"],
+            ["Create", "＋"],
+            ["Projects", "▣"],
+            ["Knowledge", "◎"],
+            ["Settings", "⚙"],
+          ].map(([item, icon]) => (
+            <button
+              type="button"
+              key={item}
+              className={activePage === item ? "active" : ""}
+              onClick={() => {
+                setActivePage(item);
+                setAccountOpen(false);
+
+                if (item !== "Projects") {
+                  setSelectedProject(null);
                 }
-                onClick={() =>
-                  setActivePage(
-                    item
-                  )
-                }
-              >
-                <span>
-                  {item}
-                </span>
-              </button>
-            )
-          )}
+              }}
+            >
+              <span aria-hidden="true">{icon}</span>
+              <span className="nav-label">{item}</span>
+            </button>
+          ))}
         </nav>
 
         <div className="sidebar-bottom">
@@ -2638,79 +2942,113 @@ function App() {
             <span className="status-dot" />
 
             <div>
-              <strong>
-                AI System
-              </strong>
-
-              <span>
-                Online
-              </span>
+              <strong>AI System</strong>
+              <span>Online</span>
             </div>
           </div>
 
           <button
             type="button"
             className="profile-button"
+            onClick={() =>
+              setAccountOpen((open) => !open)
+            }
+            aria-expanded={accountOpen}
+            aria-label="Open ShezoraX account"
+            title="Account"
           >
-            OA
+            <span className="profile-avatar">OA</span>
+
+            <span className="profile-copy">
+              <strong>Owais</strong>
+              <span>Account</span>
+            </span>
+
+            <span className="profile-chevron">
+              {accountOpen ? "⌃" : "⌄"}
+            </span>
           </button>
+
+          {accountOpen && (
+            <div className="account-panel">
+              <span className="eyebrow">ACCOUNT</span>
+              <h3>Owais Ahmed Sheikh</h3>
+              <p>
+                Connect a provider to add account authentication to ShezoraX.
+              </p>
+
+              <button
+                type="button"
+                className="account-provider-button"
+                onClick={() =>
+                  alert(
+                    "Google Sign-In UI is ready. Real Google OAuth requires a configured authentication provider/backend."
+                  )
+                }
+              >
+                <span>G</span>
+                Continue with Google
+              </button>
+
+              <button
+                type="button"
+                className="account-provider-button"
+                onClick={() =>
+                  alert(
+                    "Apple ID Sign-In UI is ready. Real Apple OAuth requires a configured authentication provider/backend."
+                  )
+                }
+              >
+                <span></span>
+                Continue with Apple ID
+              </button>
+
+              <small>
+                Provider authentication is intentionally not faked. OAuth
+                credentials must be configured before real sign-in is enabled.
+              </small>
+            </div>
+          )}
         </div>
       </aside>
 
       <main className="app-shell">
         <header className="topbar">
           <div className="breadcrumb">
-            ShezoraX
-
-            <span>
-              /
-            </span>
-
-            {activePage}
+            <span>ShezoraX</span>
+            <b>/</b>
+            <strong>
+              {selectedProject && activePage === "Projects"
+                ? getProjectType(selectedProject).title
+                : activePage}
+            </strong>
           </div>
 
           <div className="topbar-actions">
             <button
               type="button"
-              onClick={() =>
-                setActivePage(
-                  "AI Chat"
-                )
-              }
+              onClick={focusGeneralChat}
+              title="Open AI Chat"
             >
               Search
             </button>
 
             <button
               type="button"
-              onClick={() =>
-                setActivePage(
-                  "Knowledge"
-                )
-              }
+              onClick={() => {
+                setActivePage("Knowledge");
+                setSelectedProject(null);
+              }}
             >
               Knowledge
             </button>
 
             <button
               type="button"
-              onClick={() =>
-                setDarkMode(
-                  (previous) =>
-                    !previous
-                )
-              }
-            >
-              {darkMode
-                ? "Light"
-                : "Dark"}
-            </button>
-
-            <button
-              type="button"
               className="upgrade-button"
+              onClick={() => setActivePage("Settings")}
             >
-              Upgrade
+              Settings
             </button>
           </div>
         </header>
