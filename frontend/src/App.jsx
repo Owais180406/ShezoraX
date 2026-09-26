@@ -2964,33 +2964,115 @@ const renderCreateWorkspace = () => {
                       className="send-rocket-icon"
                       aria-hidden="true"
                     >
-                      <svg
-                        viewBox="0 0 32 32"
-                        role="img"
-                      >
-                        <path
-                          d="M19.8 3.2c4.2.1 7.9 3.7 8.9 8.7.7 3.5-.2 6.8-2.8 9.3l-3.2 3.2-3.6-3.6-4.4 4.4-2.3-2.3 4.4-4.4-3.6-3.6 3.2-3.2c2.5-2.5 5.2-3.5 8.4-3.5Z"
-                          fill="currentColor"
-                        />
-                        <path
-                          d="M11.2 18.8 6 20.1l-1.8 5.7 5.7-1.8 1.3-5.2-5.7 1.8Z"
-                          fill="currentColor"
-                          opacity=".7"
-                        />
-                        <circle
-                          cx="21.4"
-                          cy="11.8"
-                          r="2.1"
-                          fill="#020308"
-                        />
-                        <path
-                          d="M17.2 23.2c-.9 1.8-1.2 3.7-.8 5.4"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                          strokeLinecap="round"
-                        />
-                      </svg>
+<svg
+  viewBox="0 0 40 52"
+  className="send-rocket-svg"
+  role="img"
+  aria-hidden="true"
+>
+  {/* Rocket body */}
+  <path
+    d="M20 2.5
+       C14.2 5.2 10.8 12.1 10.8 21.2
+       C10.8 29.5 14.1 35.4 20 40.2
+       C25.9 35.4 29.2 29.5 29.2 21.2
+       C29.2 12.1 25.8 5.2 20 2.5Z"
+    fill="currentColor"
+  />
+
+  {/* Left fin */}
+  <path
+    d="M11.6 26
+       C7.2 27.7 4.8 31.7 4.4 36.8
+       C7.5 36.1 10.2 34.5 12.8 31.6
+       L14.3 28.2Z"
+    fill="currentColor"
+    opacity="0.7"
+  />
+
+  {/* Right fin */}
+  <path
+    d="M28.4 26
+       C32.8 27.7 35.2 31.7 35.6 36.8
+       C32.5 36.1 29.8 34.5 27.2 31.6
+       L25.7 28.2Z"
+    fill="currentColor"
+    opacity="0.7"
+  />
+
+  {/* Nose highlight */}
+  <path
+    d="M20 5
+       C16.8 7.8 14.8 11.2 13.8 15.1
+       C15.8 14.2 17.9 13.8 20 13.8
+       C22.1 13.8 24.2 14.2 26.2 15.1
+       C25.2 11.2 23.2 7.8 20 5Z"
+    fill="#ffffff"
+    opacity="0.14"
+  />
+
+  {/* Window frame */}
+  <circle
+    cx="20"
+    cy="18.8"
+    r="5.1"
+    fill="#05070b"
+    stroke="#ffffff"
+    strokeWidth="1"
+  />
+
+  {/* Window glass */}
+  <circle
+    cx="20"
+    cy="18.8"
+    r="3.45"
+    fill="#9bc9ff"
+    opacity="0.8"
+  />
+
+  {/* Window reflection */}
+  <path
+    d="M18.1 17
+       C18.8 16.2 19.7 15.8 20.7 16
+       C19.8 16.7 19.1 17.5 18.7 18.5
+       C18.1 18 17.8 17.5 18.1 17Z"
+    fill="#ffffff"
+    opacity="0.65"
+  />
+
+  {/* Engine nozzle */}
+  <path
+    d="M15.2 36.7
+       L16.9 42.2
+       C18.8 43 21.2 43 23.1 42.2
+       L24.8 36.7
+       C23.4 38 21.8 38.7 20 38.7
+       C18.2 38.7 16.6 38 15.2 36.7Z"
+    fill="#05070b"
+  />
+
+  {/* Engine glow */}
+  <ellipse
+    cx="20"
+    cy="42"
+    rx="3.5"
+    ry="1.25"
+    fill="#9bc9ff"
+    opacity="0.75"
+  />
+
+  {/* Exhaust flame */}
+  <path
+    className="rocket-exhaust"
+    d="M17.1 41.2
+       C16.9 44.8 18 48.2 20 50
+       C22 48.2 23.1 44.8 22.9 41.2
+       C22.1 42.4 21.2 43 20 43
+       C18.8 43 17.9 42.4 17.1 41.2Z"
+    fill="currentColor"
+    opacity="0.72"
+  />
+</svg>
                     </span>
 
                     <span className="send-rocket-label">
@@ -3511,32 +3593,114 @@ function renderCreateWorkspace() {
                       aria-hidden="true"
                     >
                       <svg
-                        viewBox="0 0 32 32"
-                        role="img"
-                      >
-                        <path
-                          d="M19.8 3.2c4.2.1 7.9 3.7 8.9 8.7.7 3.5-.2 6.8-2.8 9.3l-3.2 3.2-3.6-3.6-4.4 4.4-2.3-2.3 4.4-4.4-3.6-3.6 3.2-3.2c2.5-2.5 5.2-3.5 8.4-3.5Z"
-                          fill="currentColor"
-                        />
-                        <path
-                          d="M11.2 18.8 6 20.1l-1.8 5.7 5.7-1.8 1.3-5.2-5.7 1.8Z"
-                          fill="currentColor"
-                          opacity=".7"
-                        />
-                        <circle
-                          cx="21.4"
-                          cy="11.8"
-                          r="2.1"
-                          fill="#020308"
-                        />
-                        <path
-                          d="M17.2 23.2c-.9 1.8-1.2 3.7-.8 5.4"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                          strokeLinecap="round"
-                        />
-                      </svg>
+  viewBox="0 0 40 48"
+  className="send-rocket-svg"
+  role="img"
+  aria-hidden="true"
+>
+  {/* Main rocket body */}
+  <path
+    d="M20 2
+       C13.7 5.1 10.2 12.4 10.2 21.3
+       C10.2 29.1 13.1 34.7 20 40
+       C26.9 34.7 29.8 29.1 29.8 21.3
+       C29.8 12.4 26.3 5.1 20 2Z"
+    fill="currentColor"
+  />
+
+  {/* Left fin */}
+  <path
+    d="M10.7 25.5
+       C6.3 27.2 3.7 31.6 3.6 37.2
+       C6.6 36.5 9.5 34.9 12.2 32.3
+       L14 28.3Z"
+    fill="currentColor"
+    opacity="0.72"
+  />
+
+  {/* Right fin */}
+  <path
+    d="M29.3 25.5
+       C33.7 27.2 36.3 31.6 36.4 37.2
+       C33.4 36.5 30.5 34.9 27.8 32.3
+       L26 28.3Z"
+    fill="currentColor"
+    opacity="0.72"
+  />
+
+  {/* Nose highlight */}
+  <path
+    d="M20 4.8
+       C16.8 7.6 14.8 11.2 13.6 15.4
+       C15.7 14.4 17.8 13.9 20 13.9
+       C22.2 13.9 24.3 14.4 26.4 15.4
+       C25.2 11.2 23.2 7.6 20 4.8Z"
+    fill="#ffffff"
+    opacity="0.16"
+  />
+
+  {/* Window */}
+  <circle
+    cx="20"
+    cy="18.2"
+    r="5"
+    fill="#020308"
+    stroke="#ffffff"
+    strokeWidth="1"
+    opacity="0.95"
+  />
+
+  <circle
+    cx="20"
+    cy="18.2"
+    r="3.25"
+    fill="#8ec5ff"
+    opacity="0.72"
+  />
+
+  {/* Window reflection */}
+  <path
+    d="M18 16.4
+       C18.8 15.8 19.7 15.5 20.7 15.7
+       C19.8 16.4 19.1 17.2 18.7 18.2
+       C18.1 17.8 17.8 17.1 18 16.4Z"
+    fill="#ffffff"
+    opacity="0.65"
+  />
+
+  {/* Engine */}
+  <path
+    d="M14.2 36.5
+       L16.4 42.2
+       L23.6 42.2
+       L25.8 36.5
+       C24.1 38 22.1 38.8 20 38.8
+       C17.9 38.8 15.9 38 14.2 36.5Z"
+    fill="#05080d"
+  />
+
+  {/* Engine glow */}
+  <ellipse
+    cx="20"
+    cy="41.5"
+    rx="3.6"
+    ry="1.3"
+    fill="#8ec5ff"
+    opacity="0.8"
+  />
+
+  {/* Exhaust flame */}
+  <path
+    className="rocket-exhaust"
+    d="M16.8 41
+       C16.7 43.8 17.6 46.3 20 48
+       C22.4 46.3 23.3 43.8 23.2 41
+       C22.4 42.1 21.4 42.7 20 42.7
+       C18.6 42.7 17.6 42.1 16.8 41Z"
+    fill="currentColor"
+    opacity="0.7"
+  />
+</svg>
                     </span>
 
                     <span className="send-rocket-label">
@@ -3859,6 +4023,168 @@ function renderCreateWorkspace() {
                     </div>
                   </div>
                 )}
+
+                <div className="creator-connect-card">
+  <div className="creator-connect-heading">
+    <span className="eyebrow">CREATOR</span>
+    <h3>Connect with Creator</h3>
+    <p>
+      Follow <strong>Owais Ahmed Sheikh</strong> and explore the work behind
+      <strong> ShezoraX</strong>.
+    </p>
+  </div>
+
+  <div className="creator-social-links">
+    <a
+      href="https://github.com/Owais180406"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="creator-social-link"
+    >
+      <span className="creator-social-icon" aria-hidden="true">
+  <svg viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2C6.48 2 2 6.58 2 12.24c0 4.53 2.87 8.37 6.84 9.72.5.1.68-.22.68-.49 0-.24-.01-1.03-.01-1.87-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.52-1.11-1.52-.91-.64.07-.63.07-.63 1 .07 1.53 1.06 1.53 1.06.9 1.58 2.36 1.12 2.94.86.09-.67.35-1.12.64-1.38-2.22-.26-4.56-1.15-4.56-5.08 0-1.12.39-2.03 1.02-2.75-.1-.26-.44-1.3.1-2.71 0 0 .83-.27 2.75 1.05A9.2 9.2 0 0 1 12 6.95c.84 0 1.69.12 2.48.36 1.92-1.32 2.75-1.05 2.75-1.05.54 1.41.2 2.45.1 2.71.63.72 1.02 1.63 1.02 2.75 0 3.94-2.35 4.81-4.58 5.07.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.49A10.25 10.25 0 0 0 22 12.24C22 6.58 17.52 2 12 2Z" />
+  </svg>
+</span>
+      <span className="creator-social-copy">
+        <strong>GitHub</strong>
+        <small>Explore my projects</small>
+      </span>
+      <span className="creator-social-arrow">↗</span>
+    </a>
+
+    <a
+  href="https://www.facebook.com/profile.php?id=100093070689027"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="creator-social-link"
+>
+  <span className="creator-social-icon" aria-hidden="true">
+    <svg
+  viewBox="0 0 24 24"
+  fill="currentColor"
+  aria-hidden="true"
+>
+  <path
+    d="M13.35 21v-7.95h2.65l.42-3.1h-3.07V8.02c0-.9.25-1.5 1.48-1.5h1.7V3.75c-.3-.04-1.3-.13-2.48-.13-2.45 0-4.13 1.5-4.13 4.27v2.06H7.2v3.1h2.72V21h3.43Z"
+  />
+</svg>
+  </span>
+
+  <span className="creator-social-copy">
+    <strong>Facebook</strong>
+    <small>Connect with me</small>
+  </span>
+
+  <span className="creator-social-arrow">↗</span>
+</a>
+
+    <a
+      href="https://www.instagram.com/owaisahmed_sheikh/"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="creator-social-link"
+    >
+      <span className="creator-social-icon" aria-hidden="true">
+  <svg viewBox="0 0 24 24" fill="none">
+    <rect
+      x="3"
+      y="3"
+      width="18"
+      height="18"
+      rx="5"
+      stroke="currentColor"
+      strokeWidth="2"
+    />
+    <circle
+      cx="12"
+      cy="12"
+      r="4"
+      stroke="currentColor"
+      strokeWidth="2"
+    />
+    <circle
+      cx="17.5"
+      cy="6.5"
+      r="1"
+      fill="currentColor"
+    />
+  </svg>
+</span>
+      <span className="creator-social-copy">
+        <strong>Instagram</strong>
+        <small>Follow my journey</small>
+      </span>
+      <span className="creator-social-arrow">↗</span>
+    </a>
+
+    <a
+      href="https://www.linkedin.com/in/owais-ahmed-sheikh-723085352/"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="creator-social-link"
+    >
+      <span className="creator-social-icon" aria-hidden="true">
+  <svg viewBox="0 0 24 24" fill="currentColor">
+    <path d="M5.2 7.1A2.1 2.1 0 1 0 5.2 3a2.1 2.1 0 0 0 0 4.1ZM3.4 21h3.6V9.1H3.4V21ZM9.2 9.1h3.5v1.63h.05c.49-.93 1.68-1.91 3.45-1.91 3.69 0 4.37 2.43 4.37 5.59V21H17v-5.85c0-1.39-.03-3.18-1.94-3.18-1.94 0-2.24 1.51-2.24 3.08V21H9.2V9.1Z" />
+  </svg>
+</span>
+      <span className="creator-social-copy">
+        <strong>LinkedIn</strong>
+        <small>Connect professionally</small>
+      </span>
+      <span className="creator-social-arrow">↗</span>
+    </a>
+
+    <a
+      href="https://x.com/OwaisAhmed27976"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="creator-social-link"
+    >
+      <span className="creator-social-icon" aria-hidden="true">
+  <svg viewBox="0 0 24 24" fill="currentColor">
+    <path d="M18.9 2H22l-6.77 7.74L23.2 22h-6.24l-4.89-6.39L6.48 22H3.36l7.24-8.28L2.8 2h6.4l4.42 5.84L18.9 2Zm-1.1 17.9h1.73L8.27 3.97H6.41L17.8 19.9Z" />
+  </svg>
+</span>
+      <span className="creator-social-copy">
+        <strong>X</strong>
+        <small>Follow for updates</small>
+      </span>
+      <span className="creator-social-arrow">↗</span>
+    </a>
+
+    <a
+      href="https://my-project-pfmw.vercel.app/"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="creator-social-link"
+    >
+      <span className="creator-social-icon" aria-hidden="true">
+  <svg viewBox="0 0 24 24" fill="none">
+    <circle
+      cx="12"
+      cy="12"
+      r="9"
+      stroke="currentColor"
+      strokeWidth="1.8"
+    />
+    <path
+      d="M3.5 12h17M12 3c2.3 2.5 3.5 5.5 3.5 9S14.3 18.5 12 21M12 3C9.7 5.5 8.5 8.5 8.5 12S9.7 18.5 12 21"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+  </svg>
+</span>
+      <span className="creator-social-copy">
+        <strong>Portfolio</strong>
+        <small>View my work</small>
+      </span>
+      <span className="creator-social-arrow">↗</span>
+    </a>
+  </div>
+</div>
 
                 {settingsSection === "Profile" && (
                   <div className="settings-section-content">
