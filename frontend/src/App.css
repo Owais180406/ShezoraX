@@ -4964,3 +4964,32 @@ input:focus-visible {
     transition: none;
   }
 }
+
+.settings-navigation-icon {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.settings-google-logo {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+.settings-apple-logo {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+.settings-icon-google,
+.settings-icon-apple {
+  font-size: 0;
+}

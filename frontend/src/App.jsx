@@ -1213,6 +1213,630 @@ const SETTINGS_LANGUAGES = [
   "Russian",
 ];
 
+const LANGUAGE_LOCALES = {
+  English: "en-US",
+  Chinese: "zh-CN",
+  Japanese: "ja-JP",
+  Arabic: "ar-SA",
+  German: "de-DE",
+  French: "fr-FR",
+  Urdu: "ur-PK",
+  Spanish: "es-ES",
+  Portuguese: "pt-PT",
+  Italian: "it-IT",
+  Korean: "ko-KR",
+  Hindi: "hi-IN",
+  Turkish: "tr-TR",
+  Russian: "ru-RU",
+};
+
+/*
+  ShezoraX UI translations.
+
+  English is kept as the fallback language.
+  The keys are English UI phrases used throughout the application.
+*/
+const UI_TRANSLATIONS = {
+  English: {
+    Home: "Home",
+    "AI Chat": "AI Chat",
+    Create: "Create",
+    Projects: "Projects",
+    Knowledge: "Knowledge",
+    Settings: "Settings",
+
+    "AI System": "AI System",
+    Online: "Online",
+    Account: "Account",
+    Search: "Search",
+
+    General: "General",
+    Profile: "Profile",
+    "Google Account": "Google Account",
+    "Apple ID": "Apple ID",
+    "Religion & Faith": "Religion & Faith",
+
+    Language: "Language",
+    Voice: "Voice",
+    "Choose the language used throughout the ShezoraX interface.":
+      "Choose the language used throughout the ShezoraX interface.",
+    "Control the language and voice experience of ShezoraX.":
+      "Control the language and voice experience of ShezoraX.",
+    "Choose the AI voice ShezoraX uses for spoken responses.":
+      "Choose the AI voice ShezoraX uses for spoken responses.",
+
+    Connected: "Connected",
+    Ready: "Ready",
+    "Continue with Google": "Continue with Google",
+    "Continue with Apple ID": "Continue with Apple ID",
+    "Continue with Apple": "Continue with Apple",
+
+    "Good Morning": "Good Morning",
+    "Good Afternoon": "Good Afternoon",
+    "Good Evening": "Good Evening",
+    "Good Night": "Good Night",
+
+    "Send": "Send",
+    "Clear": "Clear",
+    "Cancel": "Cancel",
+    "Save": "Save",
+    "Delete": "Delete",
+    "Close": "Close",
+    "Back": "Back",
+    "Open": "Open",
+
+    "AI System Online": "AI System Online",
+
+    "Female": "Female",
+    "Male": "Male",
+
+    "Website / Web App": "Website / Web App",
+    "School Project": "School Project",
+    "College / University": "College / University",
+    "Software / Desktop App": "Software / Desktop App",
+    "Mobile App": "Mobile App",
+    "Game Project": "Game Project",
+    "Data / Research": "Data / Research",
+    "Presentation / Report": "Presentation / Report",
+    "Design / Creative": "Design / Creative",
+    "Custom Project": "Custom Project",
+
+    "Image Create": "Image Create",
+    "Video Create": "Video Create",
+    "Photo / Image Editing": "Photo / Image Editing",
+    "Resume / CV": "Resume / CV",
+    "Content Writing": "Content Writing",
+    "Presentation Maker": "Presentation Maker",
+    "Document Creator": "Document Creator",
+    "Story & Script Writer": "Story & Script Writer",
+    "Social Media Creator": "Social Media Creator",
+    "Logo & Branding": "Logo & Branding",
+    "Music & Audio": "Music & Audio",
+    "UI / Visual Design": "UI / Visual Design",
+    "Template Creator": "Template Creator",
+
+    "Religion": "Religion",
+    "Religious knowledge": "Religious knowledge",
+    "Faith preferences": "Faith preferences",
+    "Islam": "Islam",
+    "Christianity": "Christianity",
+    "Judaism": "Judaism",
+    "Hinduism": "Hinduism",
+    "Buddhism": "Buddhism",
+    "Sikhism": "Sikhism",
+    "Jainism": "Jainism",
+    "Baháʼí Faith": "Baháʼí Faith",
+    "Taoism": "Taoism",
+    "Confucianism": "Confucianism",
+    "Shinto": "Shinto",
+    "Zoroastrianism": "Zoroastrianism",
+    "Other / Spiritual": "Other / Spiritual",
+    "No preference": "No preference",
+  },
+
+  Chinese: {
+    Home: "主页",
+    "AI Chat": "AI 聊天",
+    Create: "创建",
+    Projects: "项目",
+    Knowledge: "知识",
+    Settings: "设置",
+    "AI System": "AI 系统",
+    Online: "在线",
+    Account: "账户",
+    Search: "搜索",
+    General: "常规",
+    Profile: "个人资料",
+    "Google Account": "Google 账户",
+    "Apple ID": "Apple ID",
+    "Religion & Faith": "宗教与信仰",
+    Language: "语言",
+    Voice: "语音",
+    Connected: "已连接",
+    Ready: "就绪",
+    "Continue with Google": "使用 Google 继续",
+    "Continue with Apple ID": "使用 Apple ID 继续",
+    "Good Morning": "早上好",
+    "Good Afternoon": "下午好",
+    "Good Evening": "晚上好",
+    "Good Night": "晚安",
+    Send: "发送",
+    Clear: "清除",
+    Cancel: "取消",
+    Save: "保存",
+    Delete: "删除",
+    Close: "关闭",
+    Back: "返回",
+    Open: "打开",
+    Female: "女性",
+    Male: "男性",
+  },
+
+  Japanese: {
+    Home: "ホーム",
+    "AI Chat": "AIチャット",
+    Create: "作成",
+    Projects: "プロジェクト",
+    Knowledge: "ナレッジ",
+    Settings: "設定",
+    "AI System": "AIシステム",
+    Online: "オンライン",
+    Account: "アカウント",
+    Search: "検索",
+    General: "一般",
+    Profile: "プロフィール",
+    "Google Account": "Googleアカウント",
+    "Apple ID": "Apple ID",
+    "Religion & Faith": "宗教と信仰",
+    Language: "言語",
+    Voice: "音声",
+    Connected: "接続済み",
+    Ready: "準備完了",
+    "Continue with Google": "Googleで続行",
+    "Continue with Apple ID": "Apple IDで続行",
+    "Good Morning": "おはようございます",
+    "Good Afternoon": "こんにちは",
+    "Good Evening": "こんばんは",
+    "Good Night": "おやすみなさい",
+    Send: "送信",
+    Clear: "クリア",
+    Cancel: "キャンセル",
+    Save: "保存",
+    Delete: "削除",
+    Close: "閉じる",
+    Back: "戻る",
+    Open: "開く",
+    Female: "女性",
+    Male: "男性",
+  },
+
+  Arabic: {
+    Home: "الرئيسية",
+    "AI Chat": "دردشة الذكاء الاصطناعي",
+    Create: "إنشاء",
+    Projects: "المشاريع",
+    Knowledge: "المعرفة",
+    Settings: "الإعدادات",
+    "AI System": "نظام الذكاء الاصطناعي",
+    Online: "متصل",
+    Account: "الحساب",
+    Search: "بحث",
+    General: "عام",
+    Profile: "الملف الشخصي",
+    "Google Account": "حساب Google",
+    "Apple ID": "Apple ID",
+    "Religion & Faith": "الدين والإيمان",
+    Language: "اللغة",
+    Voice: "الصوت",
+    Connected: "متصل",
+    Ready: "جاهز",
+    "Continue with Google": "المتابعة باستخدام Google",
+    "Continue with Apple ID": "المتابعة باستخدام Apple ID",
+    "Good Morning": "صباح الخير",
+    "Good Afternoon": "مساء الخير",
+    "Good Evening": "مساء الخير",
+    "Good Night": "تصبح على خير",
+    Send: "إرسال",
+    Clear: "مسح",
+    Cancel: "إلغاء",
+    Save: "حفظ",
+    Delete: "حذف",
+    Close: "إغلاق",
+    Back: "رجوع",
+    Open: "فتح",
+    Female: "أنثى",
+    Male: "ذكر",
+  },
+
+  German: {
+    Home: "Startseite",
+    "AI Chat": "KI-Chat",
+    Create: "Erstellen",
+    Projects: "Projekte",
+    Knowledge: "Wissen",
+    Settings: "Einstellungen",
+    "AI System": "KI-System",
+    Online: "Online",
+    Account: "Konto",
+    Search: "Suchen",
+    General: "Allgemein",
+    Profile: "Profil",
+    "Google Account": "Google-Konto",
+    "Apple ID": "Apple-ID",
+    "Religion & Faith": "Religion & Glaube",
+    Language: "Sprache",
+    Voice: "Stimme",
+    Connected: "Verbunden",
+    Ready: "Bereit",
+    "Continue with Google": "Mit Google fortfahren",
+    "Continue with Apple ID": "Mit Apple ID fortfahren",
+    "Good Morning": "Guten Morgen",
+    "Good Afternoon": "Guten Tag",
+    "Good Evening": "Guten Abend",
+    "Good Night": "Gute Nacht",
+    Send: "Senden",
+    Clear: "Löschen",
+    Cancel: "Abbrechen",
+    Save: "Speichern",
+    Delete: "Löschen",
+    Close: "Schließen",
+    Back: "Zurück",
+    Open: "Öffnen",
+    Female: "Weiblich",
+    Male: "Männlich",
+  },
+
+  French: {
+    Home: "Accueil",
+    "AI Chat": "Chat IA",
+    Create: "Créer",
+    Projects: "Projets",
+    Knowledge: "Connaissances",
+    Settings: "Paramètres",
+    "AI System": "Système IA",
+    Online: "En ligne",
+    Account: "Compte",
+    Search: "Rechercher",
+    General: "Général",
+    Profile: "Profil",
+    "Google Account": "Compte Google",
+    "Apple ID": "Apple ID",
+    "Religion & Faith": "Religion et foi",
+    Language: "Langue",
+    Voice: "Voix",
+    Connected: "Connecté",
+    Ready: "Prêt",
+    "Continue with Google": "Continuer avec Google",
+    "Continue with Apple ID": "Continuer avec Apple ID",
+    "Good Morning": "Bonjour",
+    "Good Afternoon": "Bon après-midi",
+    "Good Evening": "Bonsoir",
+    "Good Night": "Bonne nuit",
+    Send: "Envoyer",
+    Clear: "Effacer",
+    Cancel: "Annuler",
+    Save: "Enregistrer",
+    Delete: "Supprimer",
+    Close: "Fermer",
+    Back: "Retour",
+    Open: "Ouvrir",
+    Female: "Femme",
+    Male: "Homme",
+  },
+
+  Urdu: {
+    Home: "ہوم",
+    "AI Chat": "AI چیٹ",
+    Create: "بنائیں",
+    Projects: "پروجیکٹس",
+    Knowledge: "علم",
+    Settings: "سیٹنگز",
+    "AI System": "AI سسٹم",
+    Online: "آن لائن",
+    Account: "اکاؤنٹ",
+    Search: "تلاش",
+    General: "عمومی",
+    Profile: "پروفائل",
+    "Google Account": "گوگل اکاؤنٹ",
+    "Apple ID": "ایپل آئی ڈی",
+    "Religion & Faith": "مذہب اور عقیدہ",
+    Language: "زبان",
+    Voice: "آواز",
+    Connected: "منسلک",
+    Ready: "تیار",
+    "Continue with Google": "گوگل کے ساتھ جاری رکھیں",
+    "Continue with Apple ID": "ایپل آئی ڈی کے ساتھ جاری رکھیں",
+    "Good Morning": "صبح بخیر",
+    "Good Afternoon": "دوپہر بخیر",
+    "Good Evening": "شام بخیر",
+    "Good Night": "شب بخیر",
+    Send: "بھیجیں",
+    Clear: "صاف کریں",
+    Cancel: "منسوخ",
+    Save: "محفوظ کریں",
+    Delete: "حذف کریں",
+    Close: "بند کریں",
+    Back: "واپس",
+    Open: "کھولیں",
+    Female: "خاتون",
+    Male: "مرد",
+  },
+
+  Spanish: {
+    Home: "Inicio",
+    "AI Chat": "Chat de IA",
+    Create: "Crear",
+    Projects: "Proyectos",
+    Knowledge: "Conocimiento",
+    Settings: "Configuración",
+    "AI System": "Sistema de IA",
+    Online: "En línea",
+    Account: "Cuenta",
+    Search: "Buscar",
+    General: "General",
+    Profile: "Perfil",
+    "Google Account": "Cuenta de Google",
+    "Apple ID": "Apple ID",
+    "Religion & Faith": "Religión y fe",
+    Language: "Idioma",
+    Voice: "Voz",
+    Connected: "Conectado",
+    Ready: "Listo",
+    "Continue with Google": "Continuar con Google",
+    "Continue with Apple ID": "Continuar con Apple ID",
+    "Good Morning": "Buenos días",
+    "Good Afternoon": "Buenas tardes",
+    "Good Evening": "Buenas noches",
+    "Good Night": "Buenas noches",
+    Send: "Enviar",
+    Clear: "Limpiar",
+    Cancel: "Cancelar",
+    Save: "Guardar",
+    Delete: "Eliminar",
+    Close: "Cerrar",
+    Back: "Atrás",
+    Open: "Abrir",
+    Female: "Femenino",
+    Male: "Masculino",
+  },
+
+  Portuguese: {
+    Home: "Início",
+    "AI Chat": "Chat de IA",
+    Create: "Criar",
+    Projects: "Projetos",
+    Knowledge: "Conhecimento",
+    Settings: "Configurações",
+    "AI System": "Sistema de IA",
+    Online: "Online",
+    Account: "Conta",
+    Search: "Pesquisar",
+    General: "Geral",
+    Profile: "Perfil",
+    "Google Account": "Conta Google",
+    "Apple ID": "Apple ID",
+    "Religion & Faith": "Religião e fé",
+    Language: "Idioma",
+    Voice: "Voz",
+    Connected: "Conectado",
+    Ready: "Pronto",
+    "Continue with Google": "Continuar com Google",
+    "Continue with Apple ID": "Continuar com Apple ID",
+    "Good Morning": "Bom dia",
+    "Good Afternoon": "Boa tarde",
+    "Good Evening": "Boa noite",
+    "Good Night": "Boa noite",
+    Send: "Enviar",
+    Clear: "Limpar",
+    Cancel: "Cancelar",
+    Save: "Salvar",
+    Delete: "Excluir",
+    Close: "Fechar",
+    Back: "Voltar",
+    Open: "Abrir",
+    Female: "Feminino",
+    Male: "Masculino",
+  },
+
+  Italian: {
+    Home: "Home",
+    "AI Chat": "Chat IA",
+    Create: "Crea",
+    Projects: "Progetti",
+    Knowledge: "Conoscenza",
+    Settings: "Impostazioni",
+    "AI System": "Sistema IA",
+    Online: "Online",
+    Account: "Account",
+    Search: "Cerca",
+    General: "Generale",
+    Profile: "Profilo",
+    "Google Account": "Account Google",
+    "Apple ID": "Apple ID",
+    "Religion & Faith": "Religione e fede",
+    Language: "Lingua",
+    Voice: "Voce",
+    Connected: "Connesso",
+    Ready: "Pronto",
+    "Continue with Google": "Continua con Google",
+    "Continue with Apple ID": "Continua con Apple ID",
+    "Good Morning": "Buongiorno",
+    "Good Afternoon": "Buon pomeriggio",
+    "Good Evening": "Buonasera",
+    "Good Night": "Buonanotte",
+    Send: "Invia",
+    Clear: "Cancella",
+    Cancel: "Annulla",
+    Save: "Salva",
+    Delete: "Elimina",
+    Close: "Chiudi",
+    Back: "Indietro",
+    Open: "Apri",
+    Female: "Femminile",
+    Male: "Maschile",
+  },
+
+  Korean: {
+    Home: "홈",
+    "AI Chat": "AI 채팅",
+    Create: "만들기",
+    Projects: "프로젝트",
+    Knowledge: "지식",
+    Settings: "설정",
+    "AI System": "AI 시스템",
+    Online: "온라인",
+    Account: "계정",
+    Search: "검색",
+    General: "일반",
+    Profile: "프로필",
+    "Google Account": "Google 계정",
+    "Apple ID": "Apple ID",
+    "Religion & Faith": "종교 및 신앙",
+    Language: "언어",
+    Voice: "음성",
+    Connected: "연결됨",
+    Ready: "준비됨",
+    "Continue with Google": "Google로 계속",
+    "Continue with Apple ID": "Apple ID로 계속",
+    "Good Morning": "좋은 아침입니다",
+    "Good Afternoon": "좋은 오후입니다",
+    "Good Evening": "좋은 저녁입니다",
+    "Good Night": "안녕히 주무세요",
+    Send: "보내기",
+    Clear: "지우기",
+    Cancel: "취소",
+    Save: "저장",
+    Delete: "삭제",
+    Close: "닫기",
+    Back: "뒤로",
+    Open: "열기",
+    Female: "여성",
+    Male: "남성",
+  },
+
+  Hindi: {
+    Home: "होम",
+    "AI Chat": "AI चैट",
+    Create: "बनाएं",
+    Projects: "प्रोजेक्ट्स",
+    Knowledge: "ज्ञान",
+    Settings: "सेटिंग्स",
+    "AI System": "AI सिस्टम",
+    Online: "ऑनलाइन",
+    Account: "अकाउंट",
+    Search: "खोजें",
+    General: "सामान्य",
+    Profile: "प्रोफ़ाइल",
+    "Google Account": "Google अकाउंट",
+    "Apple ID": "Apple ID",
+    "Religion & Faith": "धर्म और आस्था",
+    Language: "भाषा",
+    Voice: "आवाज़",
+    Connected: "कनेक्टेड",
+    Ready: "तैयार",
+    "Continue with Google": "Google के साथ जारी रखें",
+    "Continue with Apple ID": "Apple ID के साथ जारी रखें",
+    "Good Morning": "सुप्रभात",
+    "Good Afternoon": "शुभ दोपहर",
+    "Good Evening": "शुभ संध्या",
+    "Good Night": "शुभ रात्रि",
+    Send: "भेजें",
+    Clear: "साफ़ करें",
+    Cancel: "रद्द करें",
+    Save: "सहेजें",
+    Delete: "हटाएं",
+    Close: "बंद करें",
+    Back: "वापस",
+    Open: "खोलें",
+    Female: "महिला",
+    Male: "पुरुष",
+  },
+
+  Turkish: {
+    Home: "Ana Sayfa",
+    "AI Chat": "AI Sohbet",
+    Create: "Oluştur",
+    Projects: "Projeler",
+    Knowledge: "Bilgi",
+    Settings: "Ayarlar",
+    "AI System": "AI Sistemi",
+    Online: "Çevrimiçi",
+    Account: "Hesap",
+    Search: "Ara",
+    General: "Genel",
+    Profile: "Profil",
+    "Google Account": "Google Hesabı",
+    "Apple ID": "Apple ID",
+    "Religion & Faith": "Din ve İnanç",
+    Language: "Dil",
+    Voice: "Ses",
+    Connected: "Bağlandı",
+    Ready: "Hazır",
+    "Continue with Google": "Google ile devam et",
+    "Continue with Apple ID": "Apple ID ile devam et",
+    "Good Morning": "Günaydın",
+    "Good Afternoon": "Tünaydın",
+    "Good Evening": "İyi akşamlar",
+    "Good Night": "İyi geceler",
+    Send: "Gönder",
+    Clear: "Temizle",
+    Cancel: "İptal",
+    Save: "Kaydet",
+    Delete: "Sil",
+    Close: "Kapat",
+    Back: "Geri",
+    Open: "Aç",
+    Female: "Kadın",
+    Male: "Erkek",
+  },
+
+  Russian: {
+    Home: "Главная",
+    "AI Chat": "AI-чат",
+    Create: "Создать",
+    Projects: "Проекты",
+    Knowledge: "Знания",
+    Settings: "Настройки",
+    "AI System": "Система ИИ",
+    Online: "В сети",
+    Account: "Аккаунт",
+    Search: "Поиск",
+    General: "Общие",
+    Profile: "Профиль",
+    "Google Account": "Аккаунт Google",
+    "Apple ID": "Apple ID",
+    "Religion & Faith": "Религия и вера",
+    Language: "Язык",
+    Voice: "Голос",
+    Connected: "Подключено",
+    Ready: "Готово",
+    "Continue with Google": "Продолжить с Google",
+    "Continue with Apple ID": "Продолжить с Apple ID",
+    "Good Morning": "Доброе утро",
+    "Good Afternoon": "Добрый день",
+    "Good Evening": "Добрый вечер",
+    "Good Night": "Спокойной ночи",
+    Send: "Отправить",
+    Clear: "Очистить",
+    Cancel: "Отмена",
+    Save: "Сохранить",
+    Delete: "Удалить",
+    Close: "Закрыть",
+    Back: "Назад",
+    Open: "Открыть",
+    Female: "Женский",
+    Male: "Мужской",
+  },
+};
+
+const translateUI = (language, key) => {
+  return (
+    UI_TRANSLATIONS[language]?.[key] ??
+    UI_TRANSLATIONS.English?.[key] ??
+    key
+  );
+};
+
 const SETTINGS_VOICES = [
   {
     id: "Zeenora",
@@ -1243,25 +1867,28 @@ const SETTINGS_SECTIONS = [
   },
   {
     id: "Google Account",
-    icon: "G",
+    icon: "google",
     title: "Google Account",
     description: "Manage your Google connection",
   },
   {
     id: "Apple ID",
-    icon: "",
+    icon: "apple",
     title: "Apple ID",
     description: "Manage your Apple account connection",
   },
   {
     id: "Religion & Faith",
-    icon: "☾",
+    icon: "☯",
     title: "Religion & Faith",
     description: "Manage faith and religious preferences",
   },
 ];
 
 function App() {
+  const t = (key) =>
+  translateUI(selectedLanguage, key);
+
   const [activePage, setActivePage] = useState("Home");
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
@@ -1328,7 +1955,43 @@ const clearCreateChat = () => {
   const [autoSpeakProject, setAutoSpeakProject] = useState(true);
 
   const [settingsSection, setSettingsSection] = useState("General");
-  const [selectedLanguage, setSelectedLanguage] = useState("English");
+  const [selectedLanguage, setSelectedLanguage] = useState(() => {
+  try {
+    const savedLanguage = localStorage.getItem(
+      "shezorax-language"
+    );
+
+    return SETTINGS_LANGUAGES.includes(savedLanguage)
+      ? savedLanguage
+      : "English";
+  } catch {
+    return "English";
+  }
+});
+
+useEffect(() => {
+  try {
+    localStorage.setItem(
+      "shezorax-language",
+      selectedLanguage
+    );
+
+    document.documentElement.lang =
+      LANGUAGE_LOCALES[selectedLanguage] || "en-US";
+
+    document.documentElement.dir =
+      selectedLanguage === "Arabic" ||
+      selectedLanguage === "Urdu"
+        ? "rtl"
+        : "ltr";
+  } catch (error) {
+    console.warn(
+      "ShezoraX language preference could not be saved.",
+      error
+    );
+  }
+}, [selectedLanguage]);
+
   const [selectedVoice, setSelectedVoice] = useState("Zeenora");
   const [googleConnected, setGoogleConnected] = useState(false);
   const [appleConnected, setAppleConnected] = useState(false);
@@ -1401,7 +2064,8 @@ const clearCreateChat = () => {
 
     const recognition = new SpeechRecognition();
 
-recognition.lang = "en-US";
+recognition.lang =
+  LANGUAGE_LOCALES[selectedLanguage] || "en-US";
 recognition.continuous = false;
 recognition.interimResults = false;
 recognition.maxAlternatives = 1;
@@ -1465,7 +2129,7 @@ return () => {
 
   recognitionRef.current = null;
 };
-}, []);
+}, [selectedLanguage]);
 
   /* =========================================================
      VOICE OUTPUT
@@ -1482,6 +2146,10 @@ return () => {
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
+
+    utterance.lang =
+  LANGUAGE_LOCALES[selectedLanguage] || "en-US";
+
     const voices = window.speechSynthesis.getVoices();
 
     const preferredVoice = voices.find((voice) => {
@@ -1694,6 +2362,7 @@ return () => {
         },
         body: JSON.stringify({
           message: text,
+          language: selectedLanguage,
         }),
       });
 
@@ -3837,12 +4506,48 @@ function renderCreateWorkspace() {
                         handleSettingsSection(section.id)
                       }
                     >
-                      <span className="settings-navigation-icon">
-                        {section.icon}
-                      </span>
+                      <span className={`settings-navigation-icon settings-icon-${section.icon}`}>
+  {section.icon === "google" ? (
+    <svg
+      className="settings-google-logo"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <path
+        fill="#4285F4"
+        d="M21.35 12.27c0-.71-.06-1.4-.18-2.06H12v3.9h5.24a4.48 4.48 0 0 1-1.94 2.94v2.44h3.14c1.84-1.69 2.91-4.18 2.91-7.22Z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 21.82c2.63 0 4.84-.87 6.45-2.36l-3.14-2.44c-.87.58-1.98.93-3.31.93-2.54 0-4.69-1.72-5.46-4.03H3.29v2.52A9.74 9.74 0 0 0 12 21.82Z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M6.54 13.92a5.86 5.86 0 0 1 0-3.74V7.66H3.29a9.83 9.83 0 0 0 0 8.78l3.25-2.52Z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 6.15c1.43 0 2.71.49 3.72 1.45l2.79-2.79C16.84 3.25 14.63 2.18 12 2.18a9.74 9.74 0 0 0-8.71 5.48l3.25 2.52C7.31 7.87 9.46 6.15 12 6.15Z"
+      />
+    </svg>
+  ) : section.icon === "apple" ? (
+    <svg
+      className="settings-apple-logo"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <path
+        fill="currentColor"
+        d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.07-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.81 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.07ZM12.03 7.25C11.88 5.02 13.69 3.18 15.78 3c.29 2.58-2.34 4.5-3.75 4.25Z"
+      />
+    </svg>
+  ) : (
+    section.icon
+  )}
+</span>
 
                       <span className="settings-navigation-copy">
-                        <strong>{section.title}</strong>
+                        <strong>{t(section.title)}</strong>
                         <small>{section.description}</small>
                       </span>
 
@@ -3860,7 +4565,7 @@ function renderCreateWorkspace() {
                   <div className="settings-section-content">
                     <div className="settings-section-heading">
                       <span className="eyebrow">GENERAL</span>
-                      <h2>General</h2>
+                      <h2>{t("General")}</h2>
                       <p>
                         Control the language and voice experience of
                         ShezoraX.
@@ -3871,7 +4576,7 @@ function renderCreateWorkspace() {
 
                       <div className="settings-item">
                         <div className="settings-item-copy">
-                          <strong>Language</strong>
+                          <strong>{t("Language")}</strong>
                           <span>
                             Choose the language used throughout the
                             ShezoraX interface.
@@ -3879,26 +4584,26 @@ function renderCreateWorkspace() {
                         </div>
 
                         <select
-                          className="settings-select"
-                          value={selectedLanguage}
-                          onChange={(event) =>
-                            setSelectedLanguage(event.target.value)
-                          }
-                        >
-                          {SETTINGS_LANGUAGES.map((language) => (
-                            <option
-                              key={language}
-                              value={language}
-                            >
-                              {language}
-                            </option>
-                          ))}
-                        </select>
+  className="settings-select"
+  value={selectedLanguage}
+  onChange={(event) => {
+    setSelectedLanguage(event.target.value);
+  }}
+>
+  {SETTINGS_LANGUAGES.map((language) => (
+    <option
+      key={language}
+      value={language}
+    >
+      {language}
+    </option>
+  ))}
+</select>
                       </div>
 
                       <div className="settings-item settings-item-column">
                         <div className="settings-item-copy">
-                          <strong>Voice</strong>
+                          <strong>{t("Voice")}</strong>
                           <span>
                             Choose the AI voice ShezoraX uses for
                             spoken responses.
@@ -4457,7 +5162,9 @@ function renderCreateWorkspace() {
               }}
             >
               <span aria-hidden="true">{icon}</span>
-              <span className="nav-label">{item}</span>
+              <span className="nav-label">
+  {t(item)}
+</span>
             </button>
           ))}
         </nav>
@@ -4575,10 +5282,10 @@ function renderCreateWorkspace() {
             <span>ShezoraX</span>
             <b>/</b>
             <strong>
-              {selectedProject && activePage === "Projects"
-                ? getProjectType(selectedProject).title
-                : activePage}
-            </strong>
+  {selectedProject && activePage === "Projects"
+    ? t(getProjectType(selectedProject).title)
+    : t(activePage)}
+</strong>
           </div>
 
           <div className="topbar-actions">
@@ -4587,7 +5294,7 @@ function renderCreateWorkspace() {
               onClick={focusGeneralChat}
               title="Open AI Chat"
             >
-              Search
+              {t("Search")}
             </button>
 
             <button
@@ -4597,7 +5304,7 @@ function renderCreateWorkspace() {
                 setSelectedProject(null);
               }}
             >
-              Knowledge
+              {t("Knowledge")}
             </button>
 
             <button
@@ -4605,7 +5312,7 @@ function renderCreateWorkspace() {
               className="upgrade-button"
               onClick={() => setActivePage("Settings")}
             >
-              Settings
+              {t("Settings")}
             </button>
           </div>
         </header>
