@@ -573,6 +573,7 @@ scene.add(spaceDust);
     spacecraftGroup.add(flameCore);
 
     spacecraftGroup.position.set(10.5, -5.2, -6.5);
+    spacecraftGroup.visible = false;
     spacecraftGroup.rotation.z = -0.18;
     scene.add(spacecraftGroup);
 
@@ -6829,7 +6830,7 @@ const SETTINGS_VOICES = [
 const SETTINGS_SECTIONS = [
   {
     id: "General",
-    icon: "⚙",
+    icon: "general",
     title: "General",
     description: "Language, voice and general preferences",
   },
@@ -6989,7 +6990,43 @@ useEffect(() => {
   }
 }, [userName]);
 
-  const [selectedVoice, setSelectedVoice] = useState("Zeenora");
+  
+const [selectedVoice, setSelectedVoice] = useState(() => {
+  try {
+    const savedVoice = localStorage.getItem("shezorax-voice");
+    return ["Faaz", "Zeenora"].includes(savedVoice)
+      ? savedVoice
+      : "Zeenora";
+  } catch {
+    return "Zeenora";
+  }
+});
+
+useEffect(() => {
+  try {
+    localStorage.setItem("shezorax-voice", selectedVoice);
+  } catch (error) {
+    console.warn("Unable to save voice preference:", error);
+  }
+}, [selectedVoice]);
+
+useEffect(() => {
+  try {
+    localStorage.setItem("shezorax-language", selectedLanguage);
+  } catch (error) {
+    console.warn("Unable to save language preference:", error);
+  }
+}, [selectedLanguage]);
+
+
+useEffect(() => {
+  try {
+    localStorage.setItem("shezorax-voice", selectedVoice);
+  } catch (error) {
+    console.warn("Could not save AI voice preference:", error);
+  }
+}, [selectedVoice]);
+
   const [googleConnected, setGoogleConnected] = useState(false);
   const [appleConnected, setAppleConnected] = useState(false);
 
@@ -7192,71 +7229,95 @@ return () => {
     }
   }, [createMessages]);
 
-  const speakText = (text, force = false) => {
-    if (!("speechSynthesis" in window) || !text) {
+const speakText = (text, force = false) => {
+  if (!("speechSynthesis" in window) || !text) return;
+  if (!force && !voiceReplies) return;
+
+  const synth = window.speechSynthesis;
+  synth.cancel();
+
+  const targetLang = LANGUAGE_LOCALES[selectedLanguage] || "en-US";
+  const languageCode = targetLang.split("-")[0].toLowerCase();
+
+  const femaleKeywords = [
+    "zira", "samantha", "aria", "jenny", "ava",
+    "susan", "michelle", "karen", "victoria", "female"
+  ];
+
+  const maleKeywords = [
+    "david", "mark", "guy", "james", "ryan",
+    "daniel", "george", "thomas", "male"
+  ];
+
+  const speak = () => {
+    const voices = synth.getVoices();
+
+    const languageVoices = voices.filter(voice =>
+      voice.lang.toLowerCase().startsWith(languageCode)
+    );
+
+    if (languageVoices.length === 0) {
+      console.warn(`No browser voice available for ${targetLang}`);
+      setIsSpeaking(false);
       return;
     }
 
-    if (!force && !voiceReplies) {
-      return;
-    }
+    const keywords =
+      selectedVoice === "Faaz" ? maleKeywords : femaleKeywords;
 
-    window.speechSynthesis.cancel();
+const matchingVoice = languageVoices.find(voice => {
+  const name = voice.name.toLowerCase();
+
+  if (selectedVoice === "Faaz") {
+    return maleKeywords.some(keyword => name.includes(keyword));
+  }
+
+  return femaleKeywords.some(keyword => name.includes(keyword));
+});
 
     const utterance = new SpeechSynthesisUtterance(text);
-
-    const targetLang = LANGUAGE_LOCALES[selectedLanguage] || "en-US";
     utterance.lang = targetLang;
-
-    const voices = window.speechSynthesis.getVoices();
-
-    const preferredVoice = voices.find((voice) => {
-      const name = voice.name.toLowerCase();
-      const langMatches = voice.lang.startsWith(targetLang.split("-")[0]);
-
-      if (selectedVoice === "Zeenora") {
-        return (
-          langMatches &&
-          (
-            name.includes("zira") ||
-            name.includes("samantha") ||
-            name.includes("aria") ||
-            name.includes("jenny") ||
-            name.includes("ava") ||
-            name.includes("susan") ||
-            name.includes("female")
-          )
-        );
-      }
-
-      return (
-        langMatches &&
-        !(
-          name.includes("zira") ||
-          name.includes("samantha") ||
-          name.includes("aria") ||
-          name.includes("jenny") ||
-          name.includes("ava") ||
-          name.includes("susan") ||
-          name.includes("female")
-        )
-      );
-    });
-
-    if (preferredVoice) {
-      utterance.voice = preferredVoice;
-    }
-
     utterance.rate = 0.98;
-    utterance.pitch = 1.02;
+    utterance.pitch = selectedVoice === "Faaz" ? 0.9 : 1.05;
     utterance.volume = 1;
+
+    // Use the selected gender's matching voice when available.
+    // Otherwise use a voice for the selected language.
+    if (matchingVoice) {
+  utterance.voice = matchingVoice;
+} else {
+  console.warn(
+    "Selected gender voice is not available:",
+    selectedVoice,
+    targetLang
+  );
+  setIsSpeaking(false);
+  return;
+}
 
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
     utterance.onerror = () => setIsSpeaking(false);
 
-    window.speechSynthesis.speak(utterance);
+    synth.speak(utterance);
   };
+
+  const voices = synth.getVoices();
+
+  if (voices.length > 0) {
+    speak();
+  } else {
+    synth.addEventListener("voiceschanged", function onVoicesChanged() {
+      synth.removeEventListener("voiceschanged", onVoicesChanged);
+
+      if (synth.getVoices().length > 0) {
+        speak();
+      } else {
+        setIsSpeaking(false);
+      }
+    });
+  }
+};
 
   const stopSpeaking = () => {
     if ("speechSynthesis" in window) {
@@ -8676,31 +8737,22 @@ function renderCreateWorkspace() {
                         handleSettingsSection(section.id)
                       }
                     >
-                      <span className={`settings-navigation-icon settings-icon-${section.icon}`}>
-  {section.icon === "google" ? (
+
+
+
+<span className={`settings-navigation-icon settings-icon-${section.icon}`}>
+  {section.id === "Google Account" ? (
     <svg
       className="settings-google-logo"
       viewBox="0 0 24 24"
       aria-hidden="true"
     >
-      <path
-        fill="#4285F4"
-        d="M21.35 12.27c0-.71-.06-1.4-.18-2.06H12v3.9h5.24a4.48 4.48 0 0 1-1.94 2.94v2.44h3.14c1.84-1.69 2.91-4.18 2.91-7.22Z"
-      />
-      <path
-        fill="#34A853"
-        d="M12 21.82c2.63 0 4.84-.87 6.45-2.36l-3.14-2.44c-.87.58-1.98.93-3.31.93-2.54 0-4.69-1.72-5.46-4.03H3.29v2.52A9.74 9.74 0 0 0 12 21.82Z"
-      />
-      <path
-        fill="#FBBC05"
-        d="M6.54 13.92a5.86 5.86 0 0 1 0-3.74V7.66H3.29a9.83 9.83 0 0 0 0 8.78l3.25-2.52Z"
-      />
-      <path
-        fill="#EA4335"
-        d="M12 6.15c1.43 0 2.71.49 3.72 1.45l2.79-2.79C16.84 3.25 14.63 2.18 12 2.18a9.74 9.74 0 0 0-8.71 5.48l3.25 2.52C7.31 7.87 9.46 6.15 12 6.15Z"
-      />
+      <path fill="#4285F4" d="M21.35 12.27c0-.71-.06-1.4-.18-2.06H12v3.9h5.24a4.48 4.48 0 0 1-1.94 2.94v2.44h3.14c1.84-1.69 2.91-4.18 2.91-7.22Z" />
+      <path fill="#34A853" d="M12 21.82c2.63 0 4.84-.87 6.45-2.36l-3.14-2.44c-.87.58-1.98.93-3.31.93-2.54 0-4.69-1.72-5.46-4.03H3.29v2.52A9.74 9.74 0 0 0 12 21.82Z" />
+      <path fill="#FBBC05" d="M6.54 13.92a5.86 5.86 0 0 1 0-3.74V7.66H3.29a9.83 9.83 0 0 0 0 8.78l3.25-2.52Z" />
+      <path fill="#EA4335" d="M12 6.15c1.43 0 2.71.49 3.72 1.45l2.79-2.79C16.84 3.25 14.63 2.18 12 2.18a9.74 9.74 0 0 0-8.71 5.48l3.25 2.52C7.31 7.87 9.46 6.15 12 6.15Z" />
     </svg>
-  ) : section.icon === "apple" ? (
+  ) : section.id === "Apple ID" ? (
     <svg
       className="settings-apple-logo"
       viewBox="0 0 24 24"
@@ -8711,10 +8763,56 @@ function renderCreateWorkspace() {
         d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.07-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.81 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.07ZM12.03 7.25C11.88 5.02 13.69 3.18 15.78 3c.29 2.58-2.34 4.5-3.75 4.25Z"
       />
     </svg>
+  ) : section.id === "General" ? (
+    <svg
+      className="settings-modern-icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="3.2" />
+      <path d="M19.4 15a7.8 7.8 0 0 0 .05-6l-2.1-1.2.1-2.4-3-1.7-2 1.4a7.7 7.7 0 0 0-1 0l-2-1.4-3 1.7.1 2.4L4.4 9a7.8 7.8 0 0 0 .05 6l2.1 1.2-.1 2.4 3 1.7 2-1.4a7.7 7.7 0 0 0 1 0l2 1.4 3-1.7-.1-2.4Z" />
+    </svg>
   ) : (
-    section.icon
+    <svg
+      className="settings-modern-icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {section.id === "Profile" && (
+        <>
+          <circle cx="12" cy="8" r="3.4" />
+          <path d="M5.2 20a6.8 6.8 0 0 1 13.6 0" />
+        </>
+      )}
+
+      {section.id === "Religion & Faith" && (
+        <>
+          <path d="M12 3 20 7.5v9L12 21l-8-4.5v-9L12 3Z" />
+          <path d="M12 7v10M7.5 12h9" />
+          <circle cx="12" cy="12" r="2.2" />
+        </>
+      )}
+
+      {section.id === "Creator" && (
+        <>
+          <path d="M5 12h14" />
+          <path d="m13 5 7 7-7 7" />
+        </>
+      )}
+    </svg>
   )}
 </span>
+
 
                       <span className="settings-navigation-copy">
                         <strong>{t(section.title)}</strong>
@@ -8918,20 +9016,23 @@ function renderCreateWorkspace() {
                 )}
 
                 {settingsSection === "Creator" && (
-                <div className="creator-connect-card">
-                  <div className="creator-profile-header">
-                    <div className="creator-avatar">
-                      <img src="/favicon.svg" alt="ShezoraX" />
-                    </div>
-                    <div className="creator-profile-info">
-                      <span className="eyebrow">{t("CREATOR")}</span>
-                      <h3>{userName}</h3>
-                      <p>
-                        {t("Full-Stack Developer & AI Engineer \u2014 the mind behind")}
-                        <strong> ShezoraX</strong>.
-                      </p>
-                    </div>
-                  </div>
+  <div className="creator-connect-card">
+    <div className="creator-profile-header">
+      <div className="creator-avatar">
+        <img src="/favicon.svg" alt="ShezoraX" />
+      </div>
+
+      <div className="creator-profile-info">
+        <span className="eyebrow">{t("CREATOR")}</span>
+
+        <h3>Owais Ahmed Sheikh</h3>
+
+        <p>
+          {t("Full-Stack Developer & AI Engineer — the mind behind")}
+          <strong> ShezoraX</strong>.
+        </p>
+      </div>
+    </div>
 
                   <div className="creator-connect-heading">
                     <h4>{t("Connect & Follow")}</h4>

@@ -3461,22 +3461,91 @@ input:focus-visible {
     inset 3px 0 0 rgba(142, 197, 255, 0.72);
 }
 
+/* Settings navigation icons */
 .settings-navigation-icon {
-  width: 36px;
-  height: 36px;
-  display: grid;
-  place-items: center;
-  border: 1px solid rgba(142, 197, 255, 0.12);
-  border-radius: 10px;
-  color: #9dccf7;
-  background: rgba(93, 170, 255, 0.055);
-  font-size: 13px;
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(142, 197, 255, 0.18);
+  border-radius: 12px;
+  color: #b9dcff;
+  background: linear-gradient(
+    145deg,
+    rgba(93, 170, 255, 0.14),
+    rgba(93, 170, 255, 0.04)
+  );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  font-size: 20px;
+  line-height: 1;
+  transition: background 0.25s ease,
+              border-color 0.25s ease,
+              box-shadow 0.25s ease,
+              transform 0.25s ease;
 }
 
+/* ShezoraX Settings icon redesign */
+.settings-navigation-icon:not(.settings-icon-google):not(.settings-icon-apple) {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border: 1px solid rgba(113, 185, 255, 0.25);
+  border-radius: 13px;
+  color: #c3e2ff;
+  background: linear-gradient(
+    145deg,
+    rgba(76, 158, 255, 0.20),
+    rgba(76, 158, 255, 0.055)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 3px 12px rgba(35, 117, 220, 0.08);
+  font-size: 21px;
+  line-height: 1;
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+}
+
+/* Selected Settings icon */
 .settings-navigation-item.active
-.settings-navigation-icon {
-  border-color: rgba(142, 197, 255, 0.24);
-  background: rgba(93, 170, 255, 0.1);
+.settings-navigation-icon:not(.settings-icon-google):not(.settings-icon-apple) {
+  color: #ffffff;
+  border-color: rgba(119, 192, 255, 0.60);
+  background: linear-gradient(
+    145deg,
+    rgba(62, 151, 255, 0.32),
+    rgba(62, 151, 255, 0.12)
+  );
+  box-shadow:
+    0 0 18px rgba(62, 151, 255, 0.17),
+    inset 0 1px 0 rgba(255, 255, 255, 0.10);
+}
+
+/* Hover animation */
+.settings-navigation-item:hover
+.settings-navigation-icon:not(.settings-icon-google):not(.settings-icon-apple) {
+  transform: translateY(-2px);
+  border-color: rgba(119, 192, 255, 0.48);
+}
+
+/* Mobile Settings icons */
+@media (max-width: 768px) {
+  .settings-navigation-icon:not(.settings-icon-google):not(.settings-icon-apple) {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 10px;
+    font-size: 18px;
+  }
 }
 
 .settings-navigation-copy {
@@ -4326,11 +4395,7 @@ input:focus-visible {
     display: none;
   }
 
-  .settings-navigation-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 9px;
-  }
+
 
   .settings-navigation-copy strong {
     font-size: 10px;
@@ -4974,18 +5039,6 @@ input:focus-visible {
   }
 }
 
-.settings-navigation-icon {
-  width: 42px;
-  height: 42px;
-  min-width: 42px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  font-size: 20px;
-  line-height: 1;
-}
-
 .settings-google-logo {
   width: 24px;
   height: 24px;
@@ -5001,4 +5054,107 @@ input:focus-visible {
 .settings-icon-google,
 .settings-icon-apple {
   font-size: 0;
+}
+
+  .settings-navigation-icon:not(.settings-icon-google):not(.settings-icon-apple)
+  .settings-modern-icon {
+    width: 19px;
+    height: 19px;
+  }
+
+
+/* ===== SHEZORAX PREMIUM SETTINGS ICONS ===== */
+
+/* Common icon container — Google & Apple excluded */
+.settings-navigation-icon:not(.settings-icon-google):not(.settings-icon-apple) {
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  color: #ffffff;
+  font-size: 23px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
+}
+
+/* General — electric blue */
+.settings-navigation-icon.settings-icon-⚙ {
+  color: #ffffff;
+  background: linear-gradient(135deg, #12c8ff, #3875ff 58%, #7757ff);
+  box-shadow: 0 5px 16px rgba(56, 117, 255, 0.24);
+}
+
+/* Profile — violet and pink */
+.settings-navigation-icon.settings-icon-◉ {
+  color: #ffffff;
+  background: linear-gradient(135deg, #f46bc8, #a34dff);
+  box-shadow: 0 5px 16px rgba(163, 77, 255, 0.22);
+}
+
+/* Religion & Faith — teal and green */
+.settings-navigation-icon.settings-icon-☯ {
+  color: #ffffff;
+  background: linear-gradient(135deg, #00d9ad, #1687ee);
+  box-shadow: 0 5px 16px rgba(0, 217, 173, 0.20);
+}
+
+/* Connect with Creator — gold and coral */
+.settings-navigation-icon.settings-icon-✦ {
+  color: #ffffff;
+  background: linear-gradient(135deg, #ffd65a, #ff8747 55%, #ed58a8);
+  box-shadow: 0 5px 16px rgba(255, 135, 71, 0.22);
+}
+
+/* Modern SVG icons, when present */
+.settings-navigation-icon .settings-modern-icon,
+.settings-navigation-icon .settings-premium-icon {
+  width: 22px;
+  height: 22px;
+  display: block;
+  flex-shrink: 0;
+}
+
+/* Hover animation */
+.settings-navigation-item:hover
+.settings-navigation-icon:not(.settings-icon-google):not(.settings-icon-apple) {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.38);
+}
+
+/* Active setting */
+.settings-navigation-item.active
+.settings-navigation-icon:not(.settings-icon-google):not(.settings-icon-apple) {
+  border-color: rgba(255, 255, 255, 0.48);
+  box-shadow: 0 0 20px rgba(92, 158, 255, 0.28);
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .settings-navigation-icon {
+    transition: none;
+  }
+
+  .settings-navigation-item:hover
+  .settings-navigation-icon {
+    transform: none;
+  }
+}
+
+/* Responsive sizing */
+@media (max-width: 768px) {
+  .settings-navigation-icon:not(.settings-icon-google):not(.settings-icon-apple) {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: 12px;
+  }
 }
