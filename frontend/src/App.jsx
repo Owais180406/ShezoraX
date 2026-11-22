@@ -6883,6 +6883,45 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
 
+
+const [toolsMenuOpen, setToolsMenuOpen] = useState(false);
+const [selectedTool, setSelectedTool] = useState(null);
+const [attachedFiles, setAttachedFiles] = useState([]);
+
+const shezoraTools = [
+  { id: "deep-research", name: "Deep Research", desc: "Detailed research and reports", icon: "🔬", group: "Research" },
+  { id: "web-search", name: "Search the Web", desc: "Find up-to-date information", icon: "🌐", group: "Research" },
+  { id: "grok", name: "Grok Mode", desc: "Explore trends and current topics", icon: "𝕏", group: "AI Modes" },
+  { id: "claude", name: "Claude Mode", desc: "Long documents and careful analysis", icon: "✳", group: "AI Modes" },
+  { id: "deepseek", name: "DeepSeek Mode", desc: "Advanced reasoning and problem solving", icon: "◈", group: "AI Modes" },
+  { id: "github", name: "GitHub Repository", desc: "Analyze a GitHub project", icon: "⌘", group: "Development" },
+  { id: "cursor", name: "Coding Workspace", desc: "Write, edit and debug code", icon: "▣", group: "Development" },
+  { id: "deployment", name: "Deployment Assistant", desc: "Vercel, Netlify and hosting help", icon: "🚀", group: "Development" },
+  { id: "image", name: "Create Image", desc: "Generate images from prompts", icon: "🎨", group: "Create" },
+  { id: "study", name: "Study Mode", desc: "Learn, practice and solve questions", icon: "🎓", group: "Learn" },
+  { id: "analyze", name: "Analyze Files", desc: "Understand documents and data", icon: "📄", group: "Files" }
+];
+
+const selectShezoraTool = (tool) => {
+  setSelectedTool(tool);
+  setToolsMenuOpen(false);
+  setMessage((prev) =>
+    prev ? prev : `I want to use ${tool.name}. Help me with this task.`
+  );
+};
+
+const handleShezoraFiles = (event) => {
+  const files = Array.from(event.target.files || []);
+  setAttachedFiles((prev) => [...prev, ...files]);
+  event.target.value = "";
+};
+
+const removeShezoraFile = (index) => {
+  setAttachedFiles((prev) => prev.filter((_, i) => i !== index));
+};
+
+
+
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -7872,16 +7911,43 @@ const matchingVoice = languageVoices.find(voice => {
             <h2>{t("Talk with ShezoraX")}</h2>
           </div>
 
-          <button
-            type="button"
-            className={
-              "voice-button " +
-              (isListening ? "active" : "")
-            }
-            onClick={() => startListening("general")}
-          >
-            {isListening ? t("Listening\u2026") : t("Speak")}
-          </button>
+          
+<button
+  type="button"
+  className={
+    "listen-button " +
+    (isListening ? "active" : "")
+  }
+  onClick={() => startListening("general")}
+  style={{
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "8px"
+  }}
+>
+  <svg
+    viewBox="0 0 24 24"
+    width="18"
+    height="18"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    style={{ flexShrink: 0, display: "block" }}
+  >
+    <rect x="9" y="2" width="6" height="12" rx="3" />
+    <path d="M5 10v2a7 7 0 0 0 14 0v-2" />
+    <line x1="12" y1="19" x2="12" y2="22" />
+    <line x1="8" y1="22" x2="16" y2="22" />
+  </svg>
+
+  <span>
+    {isListening ? t("Stop mic") : t("Voice")}
+  </span>
+</button>
+
         </div>
 
         <div className="conversation">
@@ -7924,6 +7990,101 @@ const matchingVoice = languageVoices.find(voice => {
           )}
         </div>
 
+        
+<div className="shezorax-tools-wrapper">
+
+  <button
+    type="button"
+    className="shezorax-plus-button"
+    onClick={() => setToolsMenuOpen((prev) => !prev)}
+    aria-label="Open tools menu"
+    title="Tools and attachments"
+  >
+    {toolsMenuOpen ? "×" : "+"}
+  </button>
+
+  {toolsMenuOpen && (
+    <div className="shezorax-tools-menu">
+
+      <div className="shezorax-tools-heading">
+        <strong>Explore ShezoraX</strong>
+        <span>AI tools & actions</span>
+      </div>
+
+      {["Research", "AI Modes", "Development", "Create", "Learn", "Files"].map((group) => (
+        <div className="shezorax-tools-group" key={group}>
+          <div className="shezorax-tools-group-title">{group}</div>
+
+          {shezoraTools
+            .filter((tool) => tool.group === group)
+            .map((tool) => (
+              <button
+                type="button"
+                className="shezorax-tool-item"
+                key={tool.id}
+                onClick={() => selectShezoraTool(tool)}
+              >
+                <span className="shezorax-tool-icon">{tool.icon}</span>
+                <span className="shezorax-tool-info">
+                  <strong>{tool.name}</strong>
+                  <small>{tool.desc}</small>
+                </span>
+                <span className="shezorax-tool-arrow">›</span>
+              </button>
+            ))}
+        </div>
+      ))}
+
+      <label className="shezorax-tool-item shezorax-upload-item">
+        <span className="shezorax-tool-icon">📎</span>
+        <span className="shezorax-tool-info">
+          <strong>Upload files</strong>
+          <small>Attach documents and images</small>
+        </span>
+        <input
+          type="file"
+          multiple
+          accept=".pdf,.doc,.docx,.txt,.csv,.xlsx,.xls,.png,.jpg,.jpeg,.webp"
+          onChange={handleShezoraFiles}
+          hidden
+        />
+      </label>
+
+    </div>
+  )}
+</div>
+
+{selectedTool && (
+  <div className="shezorax-selected-tool">
+    <span>✦ {selectedTool.name}</span>
+    <button
+      type="button"
+      onClick={() => setSelectedTool(null)}
+      aria-label="Remove selected tool"
+    >
+      ×
+    </button>
+  </div>
+)}
+
+{attachedFiles.length > 0 && (
+  <div className="shezorax-attached-files">
+    {attachedFiles.map((file, index) => (
+      <div className="shezorax-file-chip" key={`${file.name}-${index}`}>
+        <span>📄 {file.name}</span>
+        <button
+          type="button"
+          onClick={() => removeShezoraFile(index)}
+          aria-label={`Remove ${file.name}`}
+        >
+          ×
+        </button>
+      </div>
+    ))}
+  </div>
+)}
+
+
         <div className="prompt-box">
           <textarea
             ref={chatInputRef}
@@ -7950,16 +8111,42 @@ const matchingVoice = languageVoices.find(voice => {
                 {isListening ? t("Stop mic") : t("Voice")}
               </button>
 
-              <button
-                type="button"
-                className="send-button"
-                onClick={sendMessage}
-                disabled={loading || !message.trim()}
-                aria-label={t("Send")}
-                title={t("Send")}
-              >
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
-              </button>
+              
+<button
+  type="button"
+  className="send-button"
+  onClick={sendMessage}
+  disabled={loading || !message.trim()}
+  aria-label={t("Send")}
+  title={t("Send")}
+  style={{
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 0,
+    lineHeight: 1
+  }}
+>
+  <svg
+    viewBox="0 0 24 24"
+    width="20"
+    height="20"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    style={{
+      display: "block",
+      flexShrink: 0,
+      margin: "0 auto"
+    }}
+  >
+    <line x1="22" y1="2" x2="11" y2="13" />
+    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+  </svg>
+</button>
+
             </div>
           </div>
         </div>
@@ -9503,7 +9690,13 @@ function renderCreateWorkspace() {
 
       <aside className="sidebar">
         <div className="brand">
-          <img src="/favicon.svg" alt="ShezoraX" className="brand-logo" />
+          <img
+  src="/shezorax-brand-mark-hd.png"
+  alt="ShezoraX"
+  className="brand-logo"
+  draggable="false"
+/>
+
           <div>
             <strong>ShezoraX</strong>
             <span>{t("PERSONAL AI")}</span>

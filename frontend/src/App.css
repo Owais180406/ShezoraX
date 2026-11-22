@@ -200,19 +200,22 @@ input:focus-visible {
   padding: 4px 6px 28px;
 }
 
+
 .brand-logo {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  object-fit: contain;
-  filter: drop-shadow(0 0 12px rgba(134, 59, 255, 0.35));
-  transition: filter 200ms ease, transform 200ms ease;
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    object-fit: contain;
+    filter: drop-shadow(0 0 14px rgba(134, 59, 255, 0.4));
+    transition: filter 200ms ease, transform 200ms ease;
 }
 
 .brand-logo:hover {
-  filter: drop-shadow(0 0 20px rgba(134, 59, 255, 0.55));
-  transform: scale(1.06);
+    filter: drop-shadow(0 0 22px rgba(134, 59, 255, 0.6));
+    transform: scale(1.06);
 }
+
 
 .brand strong {
   display: block;
@@ -5157,4 +5160,356 @@ input:focus-visible {
     min-width: 40px;
     border-radius: 12px;
   }
+}
+
+
+
+/* =========================================
+   SHEZORAX CHATBOX - VOICE & SEND BUTTONS
+========================================= */
+
+.prompt-box .prompt-actions,
+.project-prompt-box .prompt-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.prompt-action-group {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+/* VOICE BUTTON */
+
+.prompt-action-group .listen-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    min-height: 44px;
+    padding: 0 18px;
+
+    box-sizing: border-box;
+    white-space: nowrap;
+    line-height: 1;
+}
+
+.prompt-action-group .listen-button svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+    flex-shrink: 0;
+}
+
+/* SEND BUTTON */
+
+.prompt-action-group .send-button {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+    box-sizing: border-box;
+    line-height: 1;
+}
+
+.prompt-action-group .send-button svg {
+    width: 20px;
+    height: 20px;
+
+    display: block;
+    flex-shrink: 0;
+
+    margin: 0;
+}
+
+/* HOVER EFFECT */
+
+.prompt-action-group .listen-button,
+.prompt-action-group .send-button {
+    transition:
+        transform 200ms ease,
+        box-shadow 200ms ease,
+        background 200ms ease;
+}
+
+.prompt-action-group .listen-button:hover,
+.prompt-action-group .send-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+}
+
+/* DISABLED SEND BUTTON */
+
+.prompt-action-group .send-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+    transform: none;
+}
+
+/* MOBILE RESPONSIVENESS */
+
+@media (max-width: 600px) {
+    .prompt-box .prompt-actions,
+    .project-prompt-box .prompt-actions {
+        gap: 8px;
+        align-items: center;
+    }
+
+    .prompt-action-group {
+        gap: 8px;
+    }
+
+    .prompt-action-group .listen-button {
+        min-height: 42px;
+        padding: 0 14px;
+    }
+
+    .prompt-action-group .send-button {
+        width: 42px;
+        min-width: 42px;
+        height: 42px;
+        min-height: 42px;
+    }
+}
+
+
+
+/* =========================================
+   SHEZORAX UNIFIED AI TOOLS MENU
+========================================= */
+
+.shezorax-tools-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    z-index: 100;
+}
+
+.shezorax-plus-button {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid var(--border, rgba(255,255,255,0.15));
+    background: var(--surface, #17171d);
+    color: var(--text, #fff);
+    font-size: 27px;
+    font-weight: 300;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.25s ease;
+}
+
+.shezorax-plus-button:hover {
+    transform: rotate(90deg);
+    background: var(--surface-hover, #292933);
+}
+
+/* MENU */
+
+.shezorax-tools-menu {
+    position: absolute;
+    bottom: calc(100% + 14px);
+    left: 0;
+    width: min(360px, calc(100vw - 40px));
+    max-height: 460px;
+    overflow-y: auto;
+    padding: 14px;
+    border-radius: 18px;
+    background: var(--surface, #17171d);
+    border: 1px solid var(--border, rgba(255,255,255,0.13));
+    box-shadow: 0 15px 55px rgba(0,0,0,0.35);
+    animation: shezoraxMenuOpen 180ms ease;
+    z-index: 9999;
+}
+
+@keyframes shezoraxMenuOpen {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.shezorax-tools-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 5px 8px 14px;
+}
+
+.shezorax-tools-heading strong {
+    font-size: 15px;
+    color: var(--text, #fff);
+}
+
+.shezorax-tools-heading span {
+    font-size: 12px;
+    color: var(--text-secondary, #999);
+}
+
+.shezorax-tools-group {
+    margin-bottom: 12px;
+}
+
+.shezorax-tools-group-title {
+    padding: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--text-secondary, #92929d);
+}
+
+/* TOOL ITEMS */
+
+.shezorax-tool-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border: 0;
+    border-radius: 11px;
+    background: transparent;
+    color: var(--text, #fff);
+    text-align: left;
+    cursor: pointer;
+    transition: background 180ms ease, transform 180ms ease;
+    font-family: inherit;
+}
+
+.shezorax-tool-item:hover {
+    background: var(--surface-hover, rgba(130,100,255,0.12));
+    transform: translateX(3px);
+}
+
+.shezorax-tool-icon {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: var(--surface-secondary, rgba(255,255,255,0.07));
+    font-size: 18px;
+}
+
+.shezorax-tool-info {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.shezorax-tool-info strong {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.shezorax-tool-info small {
+    font-size: 11px;
+    color: var(--text-secondary, #999);
+    line-height: 1.4;
+}
+
+.shezorax-tool-arrow {
+    font-size: 22px;
+    color: var(--text-secondary, #999);
+}
+
+/* UPLOAD */
+
+.shezorax-upload-item {
+    border-top: 1px solid var(--border, rgba(255,255,255,0.1));
+    border-radius: 0 0 10px 10px;
+    padding-top: 14px;
+}
+
+/* SELECTED TOOL */
+
+.shezorax-selected-tool {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 8px;
+    padding: 7px 12px;
+    border: 1px solid var(--border, rgba(255,255,255,0.15));
+    border-radius: 20px;
+    font-size: 12px;
+    color: var(--text, #fff);
+    background: var(--surface-secondary, rgba(255,255,255,0.07));
+}
+
+.shezorax-selected-tool button,
+.shezorax-file-chip button {
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font-size: 17px;
+}
+
+/* ATTACHED FILES */
+
+.shezorax-attached-files {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px;
+}
+
+.shezorax-file-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: var(--surface-secondary, rgba(255,255,255,0.08));
+    border: 1px solid var(--border, rgba(255,255,255,0.12));
+    color: var(--text, #fff);
+    font-size: 11px;
+}
+
+.shezorax-file-chip span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+    .shezorax-tools-menu {
+        width: min(330px, calc(100vw - 24px));
+        max-height: 65vh;
+    }
+
+    .shezorax-tool-item {
+        padding: 9px 7px;
+    }
+
+    .shezorax-plus-button {
+        width: 40px;
+        height: 40px;
+    }
 }
