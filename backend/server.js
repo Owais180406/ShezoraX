@@ -1,14 +1,15 @@
+
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const OpenAI = require("openai");
 
 dotenv.config();
 
 const app = express();
 
 const PORT = process.env.PORT || 5000;
-const AI_MODEL = process.env.OPENAI_MODEL || "gpt-5-mini";
+const AI_MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+const apiKey = process.env.GEMINI_API_KEY;
 
 const appOrigin = process.env.FRONTEND_URL || "*";
 
@@ -22,19 +23,26 @@ app.use(
 
 app.use(express.json({ limit: "1mb" }));
 
-const apiKey = process.env.OPENAI_API_KEY;
-
 if (!apiKey) {
-  console.error(
-    "ERROR: OPENAI_API_KEY is not configured."
-  );
+  console.error("ERROR: GEMINI_API_KEY is not configured.");
 }
 
-const client = apiKey
-  ? new OpenAI({
-      apiKey,
-    })
-  : null;
+// Load Gemini SDK when the first chat request arrives.
+let clientPromise;
+
+async function getGeminiClient() {
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY is not configured.");
+  }
+
+  if (!clientPromise) {
+    clientPromise = import("@google/genai").then(
+      ({ GoogleGenAI }) => new GoogleGenAI({ apiKey })
+    );
+  }
+
+  return clientPromise;
+}
 
 /* --------------------------------
    ShezoraX AI Instructions
@@ -70,6 +78,39 @@ Response style:
 You are the AI intelligence layer of the ShezoraX application.
 `;
 
+const delay = (ms) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
+
+async function generateWithRetry(client, conversation) {
+  const maxRetries = 2;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await client.models.generateContent({
+        model: AI_MODEL,
+        contents: conversation,
+        config: {
+          systemInstruction: SHEZORAX_SYSTEM_PROMPT,
+        },
+      });
+    } catch (error) {
+      const status = Number(error?.status || error?.statusCode);
+
+      if (status !== 503 || attempt === maxRetries) {
+        throw error;
+      }
+
+      const waitTime = (attempt + 1) * 2000;
+
+      console.log(
+        `Gemini temporarily unavailable. Retry ${attempt + 1}/${maxRetries} in ${waitTime / 1000}s...`
+      );
+
+      await delay(waitTime);
+    }
+  }
+}
+
 /* --------------------------------
    Health Check
 --------------------------------- */
@@ -77,8 +118,9 @@ You are the AI intelligence layer of the ShezoraX application.
 app.get("/", (req, res) => {
   res.json({
     success: true,
-    message: "ShezoraX AI Backend is running 🚀",
+    message: "ShezoraX AI Backend is running",
     status: "online",
+    provider: "Google Gemini",
     model: AI_MODEL,
   });
 });
@@ -92,6 +134,7 @@ app.get("/api/health", (req, res) => {
     success: true,
     status: "online",
     service: "ShezoraX AI Backend",
+    provider: "Google Gemini",
     model: AI_MODEL,
     apiKeyConfigured: Boolean(apiKey),
   });
@@ -103,10 +146,10 @@ app.get("/api/health", (req, res) => {
 
 app.post("/api/chat", async (req, res) => {
   try {
-    if (!client) {
+    if (!apiKey) {
       return res.status(500).json({
         success: false,
-        error: "AI service is not configured on the server.",
+        error: "Gemini API key is not configured on the server.",
       });
     }
 
@@ -122,8 +165,6 @@ app.post("/api/chat", async (req, res) => {
       });
     }
 
-    const cleanMessage = message.trim();
-
     let conversation = [];
 
     if (Array.isArray(history)) {
@@ -138,31 +179,29 @@ app.post("/api/chat", async (req, res) => {
         )
         .slice(-20)
         .map((item) => ({
-          role: item.role,
-          content: item.content.trim(),
+          role: item.role === "assistant" ? "model" : "user",
+          parts: [{ text: item.content.trim() }],
         }));
     }
 
     conversation.push({
       role: "user",
-      content: cleanMessage,
+      parts: [{ text: message.trim() }],
     });
 
-    const response = await client.responses.create({
-      model: AI_MODEL,
-      instructions: SHEZORAX_SYSTEM_PROMPT,
-      input: conversation,
-    });
+    const client = await getGeminiClient();
+
+    const response = await generateWithRetry(client, conversation);
 
     const reply =
-      typeof response.output_text === "string"
-        ? response.output_text.trim()
+      typeof response.text === "string"
+        ? response.text.trim()
         : "";
 
     if (!reply) {
       return res.status(502).json({
         success: false,
-        error: "AI returned an empty response.",
+        error: "Gemini returned an empty response.",
       });
     }
 
@@ -170,33 +209,45 @@ app.post("/api/chat", async (req, res) => {
       success: true,
       reply,
       model: AI_MODEL,
+      provider: "Google Gemini",
     });
   } catch (error) {
-    console.error("SHEZORAX OPENAI ERROR:", error);
+    console.error("SHEZORAX GEMINI ERROR:", error);
 
     const status =
-      Number.isInteger(error?.status)
-        ? error.status
-        : 500;
+      Number(error?.status || error?.statusCode || error?.code) || 500;
 
-    if (status === 401) {
+    if (status === 400) {
+      return res.status(400).json({
+        success: false,
+        error: "Gemini rejected the request. Please check the message or model.",
+      });
+    }
+
+    if (status === 401 || status === 403) {
       return res.status(500).json({
         success: false,
-        error: "AI authentication failed on the server.",
+        error: "Gemini authentication failed. Check the API key.",
       });
     }
 
     if (status === 429) {
       return res.status(429).json({
         success: false,
-        error:
-          "AI service is temporarily unavailable or rate limited.",
+        error: "Gemini usage limit reached. Please try again later.",
       });
     }
 
+    if (status === 503) {
+  return res.status(503).json({
+    success: false,
+    error: "Gemini is temporarily overloaded. Please try again shortly.",
+  });
+}
+
     return res.status(500).json({
       success: false,
-      error: "AI response failed.",
+      error: "Gemini AI response failed.",
     });
   }
 });
@@ -229,28 +280,18 @@ app.use((error, req, res, next) => {
   });
 });
 
+
+
 /* --------------------------------
-   Start Server
+   Start Server / Vercel Export
 --------------------------------- */
 
-app.listen(PORT, () => {
-  console.log(
-    `🚀 ShezoraX AI Backend running at http://localhost:${PORT}`
-  );
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`ShezoraX Backend running on port ${PORT}`);
+    console.log(`AI Model: ${AI_MODEL}`);
+    console.log(`Gemini API Key Configured: ${Boolean(apiKey)}`);
+  });
+}
 
-  console.log(
-    `🤖 Chat API: http://localhost:${PORT}/api/chat`
-  );
-
-  console.log(
-    `❤️ Health API: http://localhost:${PORT}/api/health`
-  );
-
-  console.log(
-    `🧠 AI Model: ${AI_MODEL}`
-  );
-
-  console.log(
-    `🔐 API Key Configured: ${Boolean(apiKey)}`
-  );
-});
+module.exports = app;
