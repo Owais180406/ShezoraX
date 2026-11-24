@@ -9228,157 +9228,88 @@ function renderCreateWorkspace() {
                     <p>{t("Stay updated with my latest work and projects.")}</p>
                   </div>
 
-  <div className="creator-social-links">
-    <a
-      href="https://github.com/Owais180406"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="creator-social-link"
-    >
-      <span className="creator-social-icon" aria-hidden="true">
-  <svg viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 2C6.48 2 2 6.58 2 12.24c0 4.53 2.87 8.37 6.84 9.72.5.1.68-.22.68-.49 0-.24-.01-1.03-.01-1.87-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.52-1.11-1.52-.91-.64.07-.63.07-.63 1 .07 1.53 1.06 1.53 1.06.9 1.58 2.36 1.12 2.94.86.09-.67.35-1.12.64-1.38-2.22-.26-4.56-1.15-4.56-5.08 0-1.12.39-2.03 1.02-2.75-.1-.26-.44-1.3.1-2.71 0 0 .83-.27 2.75 1.05A9.2 9.2 0 0 1 12 6.95c.84 0 1.69.12 2.48.36 1.92-1.32 2.75-1.05 2.75-1.05.54 1.41.2 2.45.1 2.71.63.72 1.02 1.63 1.02 2.75 0 3.94-2.35 4.81-4.58 5.07.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.49A10.25 10.25 0 0 0 22 12.24C22 6.58 17.52 2 12 2Z" />
-  </svg>
-</span>
-      <span className="creator-social-copy">
-        <strong>{t("GitHub")}</strong>
-        <small>{t("Explore my projects")}</small>
-      </span>
-      <span className="creator-social-arrow">↗</span>
-    </a>
+  
+<div className="creator-social-links">
+  <a
+    href="https://github.com/Owais180406"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="creator-social-link"
+  >
+    <span className="creator-social-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.48 2 2 6.58 2 12.24c0 4.53 2.87 8.37 6.84 9.72.5.1.68-.22.68-.49 0-.24-.01-1.03-.01-1.87-2.78.62-3.37-1.22-3.37-1.22-.46-1.2-1.11-1.52-1.11-1.52-.91-.64.07-.63.07-.63 1 .07 1.53 1.06 1.53 1.06.9 1.58 2.36 1.12 2.94.86.09-.67.35-1.12.64-1.38-2.22-.26-4.56-1.15-4.56-5.08 0-1.12.39-2.03 1.02-2.75-.1-.26-.44-1.3.1-2.71 0 0 .83-.27 2.75 1.05A9.2 9.2 0 0 1 12 6.95c.84 0 1.69.12 2.48.36 1.92-1.32 2.75-1.05 2.75-1.05.54 1.41.2 2.45.1 2.71.63.72 1.02 1.63 1.02 2.75 0 3.94-2.35 4.81-4.58 5.07.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.49A10.25 10.25 0 0 0 22 12.24C22 6.58 17.52 2 12 2Z" />
+      </svg>
+    </span>
+    <span className="creator-social-copy">
+      <strong>{t("GitHub")}</strong>
+      <small>{t("Explore my projects")}</small>
+    </span>
+    <span className="creator-social-arrow">↗</span>
+  </a>
 
-    <a
-  href="https://www.facebook.com/profile.php?id=100093070689027"
-  target="_blank"
-  rel="noopener noreferrer"
-  className="creator-social-link"
->
-  <span className="creator-social-icon" aria-hidden="true">
-    <svg
-  viewBox="0 0 24 24"
-  fill="currentColor"
-  aria-hidden="true"
->
-  <path
-    d="M13.35 21v-7.95h2.65l.42-3.1h-3.07V8.02c0-.9.25-1.5 1.48-1.5h1.7V3.75c-.3-.04-1.3-.13-2.48-.13-2.45 0-4.13 1.5-4.13 4.27v2.06H7.2v3.1h2.72V21h3.43Z"
-  />
-</svg>
-  </span>
+  <a
+    href="https://www.linkedin.com/in/owais-ahmed-sheikh-723085352/"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="creator-social-link"
+  >
+    <span className="creator-social-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M5.2 7.1A2.1 2.1 0 1 0 5.2 3a2.1 2.1 0 0 0 0 4.1ZM3.4 21h3.6V9.1H3.4V21ZM9.2 9.1h3.5v1.63h.05c.49-.93 1.68-1.91 3.45-1.91 3.69 0 4.37 2.43 4.37 5.59V21H17v-5.85c0-1.39-.03-3.18-1.94-3.18-1.94 0-2.24 1.51-2.24 3.08V21H9.2V9.1Z" />
+      </svg>
+    </span>
+    <span className="creator-social-copy">
+      <strong>{t("LinkedIn")}</strong>
+      <small>{t("Connect professionally")}</small>
+    </span>
+    <span className="creator-social-arrow">↗</span>
+  </a>
 
-  <span className="creator-social-copy">
-    <strong>{t("Facebook")}</strong>
-    <small>{t("Connect with me")}</small>
-  </span>
+  <a
+    href="https://x.com/OwaisAhmed27976"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="creator-social-link"
+  >
+    <span className="creator-social-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M18.9 2H22l-6.77 7.74L23.2 22h-6.24l-4.89-6.39L6.48 22H3.36l7.24-8.28L2.8 2h6.4l4.42 5.84L18.9 2Zm-1.1 17.9h1.73L8.27 3.97H6.41L17.8 19.9Z" />
+      </svg>
+    </span>
+    <span className="creator-social-copy">
+      <strong>{t("X")}</strong>
+      <small>{t("Follow for updates")}</small>
+    </span>
+    <span className="creator-social-arrow">↗</span>
+  </a>
 
-  <span className="creator-social-arrow">↗</span>
-</a>
-
-    <a
-      href="https://www.instagram.com/owaisahmed_sheikh/"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="creator-social-link"
-    >
-      <span className="creator-social-icon" aria-hidden="true">
-  <svg viewBox="0 0 24 24" fill="none">
-    <rect
-      x="3"
-      y="3"
-      width="18"
-      height="18"
-      rx="5"
-      stroke="currentColor"
-      strokeWidth="2"
-    />
-    <circle
-      cx="12"
-      cy="12"
-      r="4"
-      stroke="currentColor"
-      strokeWidth="2"
-    />
-    <circle
-      cx="17.5"
-      cy="6.5"
-      r="1"
-      fill="currentColor"
-    />
-  </svg>
-</span>
-      <span className="creator-social-copy">
-        <strong>{t("Instagram")}</strong>
-        <small>{t("Follow my journey")}</small>
-      </span>
-      <span className="creator-social-arrow">↗</span>
-    </a>
-
-    <a
-      href="https://www.linkedin.com/in/owais-ahmed-sheikh-723085352/"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="creator-social-link"
-    >
-      <span className="creator-social-icon" aria-hidden="true">
-  <svg viewBox="0 0 24 24" fill="currentColor">
-    <path d="M5.2 7.1A2.1 2.1 0 1 0 5.2 3a2.1 2.1 0 0 0 0 4.1ZM3.4 21h3.6V9.1H3.4V21ZM9.2 9.1h3.5v1.63h.05c.49-.93 1.68-1.91 3.45-1.91 3.69 0 4.37 2.43 4.37 5.59V21H17v-5.85c0-1.39-.03-3.18-1.94-3.18-1.94 0-2.24 1.51-2.24 3.08V21H9.2V9.1Z" />
-  </svg>
-</span>
-      <span className="creator-social-copy">
-        <strong>{t("LinkedIn")}</strong>
-        <small>{t("Connect professionally")}</small>
-      </span>
-      <span className="creator-social-arrow">↗</span>
-    </a>
-
-    <a
-      href="https://x.com/OwaisAhmed27976"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="creator-social-link"
-    >
-      <span className="creator-social-icon" aria-hidden="true">
-  <svg viewBox="0 0 24 24" fill="currentColor">
-    <path d="M18.9 2H22l-6.77 7.74L23.2 22h-6.24l-4.89-6.39L6.48 22H3.36l7.24-8.28L2.8 2h6.4l4.42 5.84L18.9 2Zm-1.1 17.9h1.73L8.27 3.97H6.41L17.8 19.9Z" />
-  </svg>
-</span>
-      <span className="creator-social-copy">
-        <strong>{t("X")}</strong>
-        <small>{t("Follow for updates")}</small>
-      </span>
-      <span className="creator-social-arrow">↗</span>
-    </a>
-
-    <a
-      href="https://my-project-pfmw.vercel.app/"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="creator-social-link"
-    >
-      <span className="creator-social-icon" aria-hidden="true">
-  <svg viewBox="0 0 24 24" fill="none">
-    <circle
-      cx="12"
-      cy="12"
-      r="9"
-      stroke="currentColor"
-      strokeWidth="1.8"
-    />
-    <path
-      d="M3.5 12h17M12 3c2.3 2.5 3.5 5.5 3.5 9S14.3 18.5 12 21M12 3C9.7 5.5 8.5 8.5 8.5 12S9.7 18.5 12 21"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-    />
-  </svg>
-</span>
-      <span className="creator-social-copy">
-        <strong>{t("Portfolio")}</strong>
-        <small>{t("View my work")}</small>
-      </span>
-      <span className="creator-social-arrow">↗</span>
-    </a>
-  </div>
+  <a
+    href="https://my-project-pfmw.vercel.app/"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="creator-social-link"
+  >
+    <span className="creator-social-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" />
+        <path
+          d="M3.5 12h17M12 3c2.3 2.5 3.5 5.5 3.5 9S14.3 18.5 12 21M12 3C9.7 5.5 8.5 8.5 8.5 12S9.7 18.5 12 21"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+      </svg>
+    </span>
+    <span className="creator-social-copy">
+      <strong>{t("Portfolio")}</strong>
+      <small>{t("View my work")}</small>
+    </span>
+    <span className="creator-social-arrow">↗</span>
+  </a>
 </div>
+</div>
+
                 )}
 
                 {settingsSection === "Profile" && (

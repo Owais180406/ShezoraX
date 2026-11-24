@@ -5513,3 +5513,63 @@ input:focus-visible {
         height: 40px;
     }
 }
+
+
+/* =====================================
+   SETTINGS TYPOGRAPHY & SPACING UPDATE
+===================================== */
+
+.settings-item-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.settings-item-copy strong {
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 650;
+  letter-spacing: 0.1px;
+}
+
+.settings-item-copy span {
+  font-size: 14px;
+  line-height: 1.65;
+  letter-spacing: 0.1px;
+}
+
+/* Voice option icon and text spacing */
+.settings-voice-option {
+  gap: 15px;
+  padding: 15px 17px;
+  align-items: center;
+}
+
+.settings-voice-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.settings-voice-copy strong {
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.settings-voice-copy small {
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+/* General section heading */
+.settings-section-heading h2 {
+  font-size: 25px;
+  line-height: 1.3;
+}
+
+.settings-section-heading p {
+  font-size: 15px;
+  line-height: 1.7;
+}
