@@ -9320,7 +9320,7 @@ function renderCreateWorkspace() {
                 )}
 
                 {settingsSection === "Profile" && (
-                  <div className="settings-section-content">
+                  <div className="settings-section-content settings-general-content">
                     <div className="settings-section-heading">
                       <span className="eyebrow">{t("PROFILE")}</span>
                       <h2>{t("Profile")}</h2>

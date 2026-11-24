@@ -5577,3 +5577,35 @@ input:focus-visible {
   object-fit: contain;
   display: block;
 }
+
+
+/* GENERAL MAIN CONTENT - REDUCE FONT SIZE ONLY */
+
+.settings-general-content .settings-section-heading h2 {
+  font-size: 21px;
+  line-height: 1.35;
+}
+
+.settings-general-content .settings-section-heading p {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.settings-general-content .settings-item-copy strong {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.settings-general-content .settings-item-copy span {
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.settings-general-content .settings-voice-copy strong {
+  font-size: 13px;
+}
+
+.settings-general-content .settings-voice-copy small {
+  font-size: 11px;
+}
+
