@@ -5514,28 +5514,66 @@ input:focus-visible {
     }
 }
 
-/* SETTINGS — TARGETED TYPOGRAPHY FIX ONLY */
+
+/* SETTINGS SIDEBAR - ONLY SIX NAVIGATION ITEMS */
+
+.settings-sidebar .settings-nav-item {
+  gap: 16px !important;
+  align-items: center;
+}
+
+.settings-sidebar .settings-nav-item > span,
+.settings-sidebar .settings-nav-item strong {
+  font-size: 16px !important;
+  line-height: 1.5;
+}
+
+.settings-sidebar .settings-nav-item p,
+.settings-sidebar .settings-nav-item small {
+  font-size: 13px !important;
+  line-height: 1.5;
+}
+
+.settings-sidebar .settings-nav-item svg,
+.settings-sidebar .settings-nav-item .icon {
+  flex-shrink: 0;
+}
+
+
+/* GENERAL SETTINGS - RESTORE NORMAL FONT SIZE */
 
 .settings-content .settings-section-heading h2 {
-  font-size: 25px;
+  font-size: 22px;
   line-height: 1.3;
 }
 
 .settings-content .settings-section-heading p {
-  font-size: 15px;
-  line-height: 1.65;
-}
-
-.settings-content .settings-item-copy {
-  gap: 7px;
+  font-size: 14px;
+  line-height: 1.6;
 }
 
 .settings-content .settings-item-copy strong {
-  font-size: 16px;
-  line-height: 1.45;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .settings-content .settings-item-copy span {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.settings-content .settings-voice-copy strong {
   font-size: 14px;
-  line-height: 1.6;
+}
+
+.settings-content .settings-voice-copy small {
+  font-size: 12px;
+}
+
+/* CONNECT WITH CREATOR SETINGS - BRAND LOGO IMAGE FIX */
+.creator-avatar img.brand-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }

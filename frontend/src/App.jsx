@@ -9207,9 +9207,16 @@ function renderCreateWorkspace() {
                 {settingsSection === "Creator" && (
   <div className="creator-connect-card">
     <div className="creator-profile-header">
-      <div className="creator-avatar">
-        <img src="/favicon.svg" alt="ShezoraX" />
-      </div>
+      
+<div className="creator-avatar">
+  <img
+    src="/shezorax-brand-mark-hd.png"
+    alt="ShezoraX"
+    className="brand-logo"
+    draggable="false"
+  />
+</div>
+
 
       <div className="creator-profile-info">
         <span className="eyebrow">{t("CREATOR")}</span>
